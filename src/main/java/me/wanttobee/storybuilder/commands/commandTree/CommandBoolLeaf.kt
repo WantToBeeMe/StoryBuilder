@@ -16,8 +16,8 @@ class CommandBoolLeaf(arg : String, effect : (Player, Boolean) -> Unit, emptyEff
 
     override fun thisTabComplete(sender: Player, currentlyTyping: String): List<String> {
         val list = mutableListOf<String>()
-        if("true".startsWith(currentlyTyping)) list.add("true")
-        if("false".startsWith(currentlyTyping)) list.add("false")
+        if("true".startsWith(currentlyTyping.lowercase())) list.add("true")
+        if("false".startsWith(currentlyTyping.lowercase())) list.add("false")
         return list
     }
 }

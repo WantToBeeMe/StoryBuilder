@@ -13,7 +13,7 @@ interface ICommandSystem : IPlayerCommands {
 
     override fun onCommand(sender: Player, args: Array<String>): Boolean {
         for(sysCom in systemCommands){
-            if (sysCom.baseTree.arg.lowercase() == args.first()) {
+            if (sysCom.baseTree.arg.lowercase() == args.first().lowercase()) {
                 sysCom.baseTree.onCommand(sender, args.copyOfRange(1, args.size))
                 break
             }
@@ -34,14 +34,14 @@ interface ICommandSystem : IPlayerCommands {
 
         if(args.size == 1){
             for(sysCom in systemCommands){
-                if(sysCom.baseTree.arg.lowercase().startsWith(args.first()))
+                if(sysCom.baseTree.arg.lowercase().startsWith(args.first().lowercase()))
                     list.add(sysCom.baseTree.arg)
             }
             return list
         }
 
         for(sysCom in systemCommands){
-            if(sysCom.baseTree.arg.lowercase() == args.first())
+            if(sysCom.baseTree.arg.lowercase() == args.first().lowercase())
                 return sysCom.baseTree.getTabComplete(sender, args.copyOfRange(1, args.size) )
         }
         return list

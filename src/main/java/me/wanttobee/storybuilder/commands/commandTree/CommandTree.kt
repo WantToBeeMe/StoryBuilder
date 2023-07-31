@@ -11,7 +11,7 @@ class CommandTree(arg: String,private val branches : Array<ICommandBranch> ) : I
             return
         }
         for(branch in branches) {
-            if (branch.arg.lowercase() == tailArgs.first()){
+            if (branch.arg.lowercase() == tailArgs.first().lowercase()){
                 branch.onCommand(sender, tailArgs.copyOfRange(1, tailArgs.size) )
                 return
             }
@@ -21,7 +21,7 @@ class CommandTree(arg: String,private val branches : Array<ICommandBranch> ) : I
 
     override fun nextTabComplete(sender: Player, fromArg:String, tailArgs: Array<String>): List<String> {
         for(branch in branches){
-            if(branch.arg.lowercase() == fromArg)
+            if(branch.arg.lowercase() == fromArg.lowercase())
                 return branch.getTabComplete(sender, tailArgs)
         }
         return emptyList()
@@ -30,7 +30,7 @@ class CommandTree(arg: String,private val branches : Array<ICommandBranch> ) : I
     override fun thisTabComplete(sender: Player, currentlyTyping: String) : List<String> {
         val list = mutableListOf<String>()
         for(branch in branches)
-            if(branch.arg.lowercase().contains(currentlyTyping)) list.add(branch.arg)
+            if(branch.arg.lowercase().contains(currentlyTyping.lowercase())) list.add(branch.arg)
         return list
     }
 }

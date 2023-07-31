@@ -19,24 +19,23 @@ interface IPlayerCommands : CommandExecutor, TabCompleter {
             help(sender)
             return true
         }
-        val lowerArgs = (args.map { it.lowercase() }).toTypedArray()
 
-        if(lowerArgs[0] == "help") {
+        if(args[0].lowercase() == "help") {
             help(sender)
             return true
         }
-        return onCommand(sender, lowerArgs)
+        return onCommand(sender, Array(args.size) { index -> args[index] } )
     }
     fun onCommand(sender: Player, args : Array<String>) : Boolean
 
     override fun onTabComplete(sender: CommandSender, command: Command, label: String, args: Array<out String>): List<String> {
-        val list : MutableList<String> = mutableListOf<String>();
+        val list : MutableList<String> = mutableListOf();
 
         if (sender !is Player || args.isEmpty())
             return list
-        val args = (args.map { it.lowercase() }).toTypedArray()
+        val args = Array(args.size) { index -> args[index] }
 
-        if(args.size == 1 && "help".startsWith(args[0]))
+        if(args.size == 1 && "help".startsWith(args[0].lowercase()))
             return onTabComplete(sender, args) + "help"
 
         return onTabComplete(sender, args)

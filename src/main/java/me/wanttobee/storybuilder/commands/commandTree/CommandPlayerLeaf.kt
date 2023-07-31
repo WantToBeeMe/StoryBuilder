@@ -22,13 +22,13 @@ class CommandPlayerLeaf private constructor(arg : String,private val realTimePos
         //}
         if(realTimePossiblePlayers != null){
             for(pos in realTimePossiblePlayers.invoke()){
-                if(pos.name.lowercase() == tailArgs.first())
+                if(pos.name.lowercase() == tailArgs.first().lowercase())
                     return pos
             }
         }
         if(possiblePlayers != null){
             for(pos in possiblePlayers){
-                if(pos.name.lowercase() == tailArgs.first())
+                if(pos.name.lowercase() == tailArgs.first().lowercase())
                     return pos
             }
         }
@@ -44,13 +44,13 @@ class CommandPlayerLeaf private constructor(arg : String,private val realTimePos
         } else {
             if(possiblePlayers != null){
                 for (pos in possiblePlayers) {
-                    if (pos.name.lowercase().contains(currentlyTyping))
+                    if (pos.name.lowercase().contains(currentlyTyping.lowercase()))
                         list.add(pos.name)
                 }
             }
             if(realTimePossiblePlayers != null){
                 for (pos in realTimePossiblePlayers.invoke()) {
-                    if (pos.name.lowercase().contains(currentlyTyping))
+                    if (pos.name.lowercase().contains(currentlyTyping.lowercase()))
                         list.add(pos.name)
                 }
             }

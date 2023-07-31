@@ -8,22 +8,17 @@ class CommandStringLeaf private constructor(arg : String,private val realTimePos
     constructor (arg : String, realTimePossibilities : () -> Array<String>, effect : (Player, String) -> Unit, emptyEffect : ((Player) -> Unit)? = null) : this(arg, realTimePossibilities,null, effect, emptyEffect)
     override fun validateValue(sender: Player, tailArgs: Array<String>): String? {
         if(tailArgs.isEmpty()) return null
-        if(tailArgs.first() == "..."){
-            if(emptyEffect != null) emptyEffect.invoke(sender)
-            else sender.sendMessage("${ChatColor.RED}these ${ChatColor.GRAY}...${ChatColor.RED} are there to convey that you could type any string, but not literally ${ChatColor.GRAY}...")
-            return null
-        }
         if(possibilities == null && realTimePossibilities == null )
             return tailArgs.first()
         if(possibilities != null){
             for(pos in possibilities){
-                if(pos.lowercase() == tailArgs.first())
+                if(pos.lowercase() == tailArgs.first().lowercase())
                     return tailArgs.first()
             }
         }
         if(realTimePossibilities != null){
             for(pos in realTimePossibilities.invoke()){
-                if(pos.lowercase() == tailArgs.first())
+                if(pos.lowercase() == tailArgs.first().lowercase())
                     return tailArgs.first()
             }
         }
@@ -38,12 +33,12 @@ class CommandStringLeaf private constructor(arg : String,private val realTimePos
                 list.add("...")
         } else if(possibilities != null) {
             for (pos in possibilities) {
-                if (pos.lowercase().contains(currentlyTyping))
+                if (pos.lowercase().contains(currentlyTyping.lowercase()))
                     list.add(pos)
             }
         } else{
             for (pos in realTimePossibilities!!.invoke()) {
-                if (pos.lowercase().contains(currentlyTyping))
+                if (pos.lowercase().contains(currentlyTyping.lowercase()))
                     list.add(pos)
             }
         }
