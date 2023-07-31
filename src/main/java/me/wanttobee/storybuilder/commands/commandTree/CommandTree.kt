@@ -4,10 +4,11 @@ import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 
 //we can assume that the tailArgs are always lowercase
-class CommandTree(arg: String,private val branches : Array<ICommandBranch> ) : ICommandBranch(arg) {
+class CommandTree(arg: String,private val branches : Array<ICommandBranch>,private val emptyEffect:((Player) -> Unit)? = null ) : ICommandBranch(arg) {
     override fun onCommand(sender: Player, tailArgs: Array<String>) {
         if(tailArgs.isEmpty()){
-            sender.sendMessage("${ChatColor.RED} not enough arguments found")
+            if(emptyEffect != null) emptyEffect.invoke(sender)
+            else sender.sendMessage("${ChatColor.RED} not enough arguments found")
             return
         }
         for(branch in branches) {

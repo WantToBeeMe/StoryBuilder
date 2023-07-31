@@ -1,6 +1,9 @@
 package me.wanttobee.storybuilder;
 
 import me.wanttobee.storybuilder.commands.SBCommands
+import me.wanttobee.storybuilder.systems.FontSystem
+import me.wanttobee.storybuilder.systems.textBox.TextBox
+import me.wanttobee.storybuilder.systems.textBox.TextBoxSystem
 import org.bukkit.ChatColor
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.plugin.java.annotation.command.Command
@@ -18,14 +21,14 @@ import org.bukkit.plugin.java.annotation.plugin.author.Author
 @Description("building tools helping you to tell the perfect story")
 
 @Commands(
-    Command(name = "storyBuilder", aliases = ["s,sb"], usage = "/sb"),
+    Command(name = "storyBuilder", aliases = ["sb"], usage = "/sb"),
 )
 
 @Library("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.22") //kotlin !!
 class SBPlugin : JavaPlugin() {
     companion object {
         lateinit var instance: SBPlugin
-        val title = "${ChatColor.GRAY}[${ChatColor.GOLD}Story Builder${ChatColor.GRAY}]${ChatColor.RESET}"
+        val title = "${ChatColor.GRAY}[${ChatColor.GOLD}Story Builder${ChatColor.GRAY}]${ChatColor.RESET} "
     }
 
     override fun onEnable() {
@@ -34,7 +37,9 @@ class SBPlugin : JavaPlugin() {
         getCommand("storyBuilder")?.setExecutor(SBCommands)
         getCommand("storyBuilder")?.tabCompleter = SBCommands
 
-        //server.pluginManager.registerEvents(ManHuntSystem, this)
+        FontSystem.initializeFonts()
+        server.pluginManager.registerEvents(TextBoxSystem, this)
+        server.scheduler.scheduleSyncRepeatingTask(this, { TextBoxSystem.everyTick() } , 0, 1 )
 
         StartUpTests.run()
     }
