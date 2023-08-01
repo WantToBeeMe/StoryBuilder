@@ -21,7 +21,8 @@ interface IPlayerCommands : CommandExecutor, TabCompleter {
         }
 
         if(args[0].lowercase() == "help") {
-            help(sender)
+            val page : Int = if(args.size < 2) 1 else args[1].toIntOrNull() ?: 1
+            help(sender, Math.max(1,page))
             return true
         }
         return onCommand(sender, Array(args.size) { index -> args[index] } )
@@ -42,5 +43,5 @@ interface IPlayerCommands : CommandExecutor, TabCompleter {
     }
     fun onTabComplete(sender: Player, args : Array<String>) : List<String>
 
-    fun help(sender: Player)
+    fun help(sender: Player, page : Int = 1)
 }

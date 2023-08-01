@@ -1,10 +1,8 @@
 package me.wanttobee.storybuilder.systems
 
 import me.wanttobee.storybuilder.commands.ISystemCommand
-import me.wanttobee.storybuilder.commands.commandTree.CommandStringLeaf
-import me.wanttobee.storybuilder.commands.commandTree.CommandTree
-import me.wanttobee.storybuilder.commands.commandTree.CommandVarargLeaf
-import me.wanttobee.storybuilder.commands.commandTree.ICommandBranch
+import me.wanttobee.storybuilder.commands.commandTree.*
+import me.wanttobee.storybuilder.systems.playerStory.StorySystem
 
 
 object TextCommands : ISystemCommand {
@@ -13,18 +11,10 @@ object TextCommands : ISystemCommand {
 
 
     private val fontTree = CommandStringLeaf("font", { FontSystem.getAllFiles(false) },
-        { p, fileName -> FontSystem.loadFont(p, fileName) },
-        { p -> FontSystem.currentFontMessage(p) })
+        { p, fileName -> StorySystem.loadFont(p,fileName) },
+        { p -> StorySystem.loadFont(p,null) })
 
-    private val buildTree = CommandVarargLeaf("build",
-        CommandStringLeaf("words" ,null, {_,_->} ),
-        false,
-        {commander, text ->
-            BuildingSystem.buildSentence(commander,text)
-        }
-    )
     override val baseTree: ICommandBranch = CommandTree("text", arrayOf(
-        buildTree,
-        fontTree
+        fontTree,
     ))
 }

@@ -1,9 +1,7 @@
 package me.wanttobee.storybuilder;
 
-import me.wanttobee.storybuilder.commands.SBCommands
 import me.wanttobee.storybuilder.systems.FontSystem
-import me.wanttobee.storybuilder.systems.textBox.TextBox
-import me.wanttobee.storybuilder.systems.textBox.TextBoxSystem
+import me.wanttobee.storybuilder.systems.playerStory.StorySystem
 import org.bukkit.ChatColor
 import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.plugin.java.annotation.command.Command
@@ -21,7 +19,7 @@ import org.bukkit.plugin.java.annotation.plugin.author.Author
 @Description("building tools helping you to tell the perfect story")
 
 @Commands(
-    Command(name = "storyBuilder", aliases = ["sb"], usage = "/sb"),
+    Command(name = "storyBuilder", aliases = ["sb","st"], usage = "/sb"),
 )
 
 @Library("org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.22") //kotlin !!
@@ -38,15 +36,15 @@ class SBPlugin : JavaPlugin() {
         getCommand("storyBuilder")?.tabCompleter = SBCommands
 
         FontSystem.initializeFonts()
-        server.pluginManager.registerEvents(TextBoxSystem, this)
-        server.scheduler.scheduleSyncRepeatingTask(this, { TextBoxSystem.everyTick() } , 0, 1 )
+
+        server.pluginManager.registerEvents(StorySystem, this)
+        server.scheduler.scheduleSyncRepeatingTask(this, { StorySystem.everyTick() } , 0, 1 )
 
         StartUpTests.run()
     }
 
-    override fun onDisable() {}
-
-
-
-
+    override fun onDisable() {
+        for((_,st) in StorySystem.stories)
+            st.clear()
+    }
 }

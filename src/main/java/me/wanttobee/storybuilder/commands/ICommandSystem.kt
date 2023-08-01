@@ -21,12 +21,20 @@ interface ICommandSystem : IPlayerCommands {
         return true
     }
 
-    override fun help(sender: Player){
-        sender.sendMessage("${SBPlugin.title} $helpText")
+    override fun help(sender: Player, page : Int){
+        val amountPerPage = 8
+        val totalPages = (systemCommands.size/amountPerPage)+1
+        val page = Math.min(page,totalPages)
+        sender.sendMessage("${ChatColor.GRAY}-========= ${ChatColor.WHITE}$page/$totalPages ${ChatColor.GRAY}=========-")
+        if(page == 1) sender.sendMessage("${SBPlugin.title}$helpText")
         val helperTab : (String)-> String = { h -> "${ChatColor.YELLOW}$h${ChatColor.WHITE}"}
-        for(sysCom in systemCommands){
-            sender.sendMessage("- ${helperTab(sysCom.baseTree.arg + ":")} ${sysCom.helpText} ${ChatColor.GRAY}${sysCom.exampleCommand}")
+        for(sysCom in 0 until amountPerPage){
+            val index = sysCom + (page-1)*amountPerPage
+            if(systemCommands.size <= index) break
+            val command = systemCommands[sysCom]
+            sender.sendMessage("- ${helperTab(command.baseTree.arg + ":")} ${command.helpText} ${ChatColor.GRAY}${command.exampleCommand}")
         }
+        sender.sendMessage("${ChatColor.GRAY}-======== ${ChatColor.WHITE}$page/$totalPages ${ChatColor.GRAY}========-")
     }
 
     override fun onTabComplete(sender: Player, args: Array<String>): List<String> {

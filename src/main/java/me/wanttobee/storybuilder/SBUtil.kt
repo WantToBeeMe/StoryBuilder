@@ -1,7 +1,9 @@
 package me.wanttobee.storybuilder
 
+import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.Particle
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
@@ -36,4 +38,27 @@ object SBUtil {
         return itemFactory(material, title, listOf(lore), amount,enchanted)
     }
 
+    fun Location.blockLocation(): Location {
+        return Location(world, blockX.toDouble(), blockY.toDouble(), blockZ.toDouble())
+    }
+    fun Location.rigidParticles(particle : Particle, dustOptions : Particle.DustOptions? ) {
+        if(this.world == null) return
+        val particles = 3
+        for(i in 0..particles){
+            world!!.spawnParticle(particle, x+(i/particles.toDouble()),y+1,z+1,1, 0.0,0.0,0.0, dustOptions)
+            world!!.spawnParticle(particle, x+(i/particles.toDouble()),y+1,z+0,1, 0.0,0.0,0.0, dustOptions)
+            world!!.spawnParticle(particle, x+(i/particles.toDouble()),y+0,z+1,1, 0.0,0.0,0.0, dustOptions)
+            world!!.spawnParticle(particle, x+(i/particles.toDouble()),y+0,z+0,1, 0.0,0.0,0.0, dustOptions)
+
+            world!!.spawnParticle(particle, x+1,y+(i/particles.toDouble()),z+1,1, 0.0,0.0,0.0, dustOptions)
+            world!!.spawnParticle(particle, x+1,y+(i/particles.toDouble()),z+0,1, 0.0,0.0,0.0, dustOptions)
+            world!!.spawnParticle(particle, x+0,y+(i/particles.toDouble()),z+1,1, 0.0,0.0,0.0, dustOptions)
+            world!!.spawnParticle(particle, x+0,y+(i/particles.toDouble()),z+0,1, 0.0,0.0,0.0, dustOptions)
+
+            world!!.spawnParticle(particle, x+1,y+1,z+(i/particles.toDouble()),1, 0.0,0.0,0.0, dustOptions)
+            world!!.spawnParticle(particle, x+0,y+1,z+(i/particles.toDouble()),1, 0.0,0.0,0.0, dustOptions)
+            world!!.spawnParticle(particle, x+1,y+0,z+(i/particles.toDouble()),1, 0.0,0.0,0.0, dustOptions)
+            world!!.spawnParticle(particle, x+0,y+0,z+(i/particles.toDouble()),1, 0.0,0.0,0.0, dustOptions)
+        }
+    }
 }

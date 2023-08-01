@@ -13,9 +13,6 @@ import java.awt.geom.PathIterator
 object FontSystem {
     private val plugin = SBPlugin.instance
     val folder = File(plugin.dataFolder, File.separator + "FontFiles")
-    private var currentFontPath = "Lumanosimo-Regular.ttf"
-    var font : Font = getResourceFont(currentFontPath)
-        private set
 
     private fun getResourceFont(name: String): Font {
         val inputStream = this.javaClass.getResourceAsStream("/$name")
@@ -51,26 +48,11 @@ object FontSystem {
         else Array(folderList.size) { i -> folderList[i].removeSuffix(".ttf")}
     }
 
-    private fun getFont(name: String): Font? {
+    fun getFont(name: String): Font? {
         val fileName = if(name.endsWith(".ttf")) name else "$name.ttf"
         val file = File(folder, File.separator + fileName)
         if (!file.exists()) return null
         return  Font.createFont(Font.TRUETYPE_FONT, file)
-    }
-
-    fun loadFont(commander: Player, fontPath: String){
-        val newFont = getFont(fontPath)
-        if(newFont == null){
-            commander.sendMessage("${ChatColor.RED}Cant find font file: ${ChatColor.GRAY}$fontPath")
-            return
-        }
-        font = newFont
-        currentFontPath = fontPath
-        commander.sendMessage("${ChatColor.GREEN}font has been changed to:")
-        currentFontMessage(commander)
-    }
-    fun currentFontMessage(commander:Player){
-        commander.sendMessage("${ChatColor.WHITE}${currentFontPath.removeSuffix(".ttf")}> ${ChatColor.GOLD}${font.fontName}")
     }
 
 }
