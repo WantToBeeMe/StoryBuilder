@@ -1,37 +1,32 @@
 package me.wanttobee.storybuilder.systems
 import me.wanttobee.storybuilder.SBPlugin
-import org.bukkit.ChatColor
-import org.bukkit.entity.Player
 import java.io.File
 import java.io.FileOutputStream
 import java.awt.Font
-import java.awt.font.FontRenderContext
-import java.awt.geom.AffineTransform
-import java.awt.geom.PathIterator
 
 
-object FontSystem {
+object FontFileSystem {
     private val plugin = SBPlugin.instance
-    val folder = File(plugin.dataFolder, File.separator + "FontFiles")
+    private val folder = File(plugin.dataFolder, File.separator + "FontFiles")
 
-    private fun getResourceFont(name: String): Font {
-        val inputStream = this.javaClass.getResourceAsStream("/$name")
-        if (inputStream == null)
-            plugin.logger.warning("'$name' not found in the resources folder.")
-        val tempFile = File.createTempFile("font", ".ttf")
-        FileOutputStream(tempFile).use { output ->
-            inputStream.copyTo(output)
-        }
-        val font = Font.createFont(Font.TRUETYPE_FONT, tempFile)
-        tempFile.delete()
-        return font
-    }
+    //private fun getResourceFont(name: String): Font {
+    //    val inputStream = this.javaClass.getResourceAsStream("/$name")
+    //    if (inputStream == null)
+    //        plugin.logger.warning("'$name' not found in the resources folder.")
+    //    val tempFile = File.createTempFile("font", ".ttf")
+    //    FileOutputStream(tempFile).use { output ->
+    //        inputStream.copyTo(output)
+    //    }
+    //    val font = Font.createFont(Font.TRUETYPE_FONT, tempFile)
+    //    tempFile.delete()
+    //    return font
+    //}
 
-    fun initializeFonts(){
+    fun initialize(){
         folder.mkdirs()
         val resourceFonts = arrayOf("Lumanosimo-Regular.ttf", "Anton-Regular.ttf" ,"Lobster-Regular.ttf", "Borel-Regular.ttf")
         for(resourceFontPath in resourceFonts){
-            val inputStream = this.javaClass.getResourceAsStream("/$resourceFontPath")
+            val inputStream = this.javaClass.getResourceAsStream("/defaultFonts/$resourceFontPath")
             if (inputStream == null)
                 plugin.logger.warning("'$resourceFontPath' not found in the resources folder.")
             else{

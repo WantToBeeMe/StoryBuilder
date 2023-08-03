@@ -102,10 +102,10 @@ class BlockRecorder {
             override val exampleCommand: String= "/sd undo [Int/amount]"
             override val helpText: String = "to undo your last action"
             override val baseTree = CommandIntLeaf("undo", 1, 10,
-                    {p, i -> val succeeded = StorySystem.getPlayersStory(p).blockRecorder.undo(i)
+                    {p, i -> val succeeded = StorySystem.getPlayersStory(p).undo(i)
                         if(succeeded) p.sendMessage("${SBPlugin.title}${ChatColor.GREEN}undo done")
                         else p.sendMessage("${SBPlugin.title}${ChatColor.RED}no more undoes left")},
-                    {p -> val succeeded = StorySystem.getPlayersStory(p).blockRecorder.undo(1)
+                    {p -> val succeeded = StorySystem.getPlayersStory(p).undo(1)
                         if(succeeded) p.sendMessage("${SBPlugin.title}${ChatColor.GREEN}undo done")
                         else p.sendMessage("${SBPlugin.title}${ChatColor.RED}no more undoes left")
                     })
@@ -116,10 +116,10 @@ class BlockRecorder {
             override val exampleCommand: String= "/sd redo [Int/amount]"
             override val helpText: String = "to redo your last undone action"
             override val baseTree = CommandIntLeaf("redo", 1, 10,
-                    {p, i -> val succeeded = StorySystem.getPlayersStory(p).blockRecorder.redo(i)
+                    {p, i -> val succeeded = StorySystem.getPlayersStory(p).redo(i)
                         if(succeeded) p.sendMessage("${SBPlugin.title}${ChatColor.GREEN}redo done")
                         else p.sendMessage("${SBPlugin.title}${ChatColor.RED}no more redoes left")},
-                    {p -> val succeeded = StorySystem.getPlayersStory(p).blockRecorder.redo(1)
+                    {p -> val succeeded = StorySystem.getPlayersStory(p).redo(1)
                         if(succeeded) p.sendMessage("${SBPlugin.title}${ChatColor.GREEN}redo done")
                         else p.sendMessage("${SBPlugin.title}${ChatColor.RED}no more redoes left")})
         }

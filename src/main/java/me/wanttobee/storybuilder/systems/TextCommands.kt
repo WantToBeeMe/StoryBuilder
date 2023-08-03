@@ -10,7 +10,7 @@ object TextCommands : ISystemCommand {
     override val helpText: String = "place text in the world"
 
 
-    private val fontTree = CommandStringLeaf("font", { FontSystem.getAllFiles(false) },
+    private val fontTree = CommandStringLeaf("font", { FontFileSystem.getAllFiles(false) },
         { p, fileName -> StorySystem.loadFont(p,fileName) },
         { p -> StorySystem.loadFont(p,null) })
 

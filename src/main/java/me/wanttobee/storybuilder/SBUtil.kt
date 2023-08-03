@@ -61,4 +61,24 @@ object SBUtil {
             world!!.spawnParticle(particle, x+0,y+0,z+(i/particles.toDouble()),1, 0.0,0.0,0.0, dustOptions)
         }
     }
+
+    fun getRealName(material: Material): String {
+        val name = material.name.lowercase()
+        var words = name.split("_")
+
+        if (words.size == 2 && words[1] == "minecart") {
+            words = listOf(words[1], "with", words[0])
+        }
+        else if(words.contains("template")) return "Smithing Template"
+        else if(words.contains("music")) return "Music Disc"
+
+        val formattedWords = words.map { word ->
+            when (word) {
+                "of", "on", "a", "with" -> word
+                "tnt" -> word.uppercase()
+                else -> word.capitalize()
+            }
+        }
+        return formattedWords.joinToString(" ")
+    }
 }
