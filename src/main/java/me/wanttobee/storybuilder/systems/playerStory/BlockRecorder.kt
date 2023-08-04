@@ -7,73 +7,99 @@ import me.wanttobee.storybuilder.commands.commandTree.CommandIntLeaf
 import org.bukkit.ChatColor
 import org.bukkit.Location
 import org.bukkit.block.data.BlockData
+import org.bukkit.entity.Player
 
 class BlockRecorder {
-    private val undoList : Array<MutableMap<Location, BlockData>?> = arrayOfNulls(10)
-    private val redoList : Array<MutableMap<Location, BlockData>?> = arrayOfNulls(10)
+    private val plugin = SBPlugin.instance
+    private val undoStack : Array<MutableMap<Location, BlockData>?> = arrayOfNulls(10) //when te stack is full and you want to add something,
+    private val redoStack : Array<MutableMap<Location, BlockData>?> = arrayOfNulls(10) //the bottom one gets deleted and everything gets moved down by 1 (not really a stack then anymore lol)
     
     private var currentAction : MutableMap<Location, BlockData>? = null
 
+    fun runRecorderAsync(task : (BlockRecorder) -> Unit) {
+        BlockRecorderSystem.enqueue {
+            this.start()
+            task.invoke(this)
+            this.finish()
+        }
+    }
+    fun runRecorderSynced(task : (BlockRecorder) -> Unit){
+        this.start()
+        task.invoke(this)
+        this.finish()
+    }
+
     private fun pushUndo(){
         if(currentAction == null) return
-        val listSize =undoList.size-1
+        val listSize =undoStack.size-1
         for(index in 0 until listSize)
-            undoList[ listSize-index ] = undoList[listSize-index-1 ]
-        undoList[0] = currentAction
+            undoStack[ listSize-index ] = undoStack[listSize-index-1 ]
+        undoStack[0] = currentAction
         currentAction = null
     }
     private fun pushRedo(){
         if(currentAction == null) return
-        val listSize =redoList.size-1
+        val listSize =redoStack.size-1
         for(index in 0 until listSize)
-            redoList[ listSize-index ] = redoList[listSize-index-1 ]
-        redoList[0] = currentAction
+            redoStack[ listSize-index ] = redoStack[listSize-index-1 ]
+        redoStack[0] = currentAction
         currentAction = null
     }
 
     private fun popUndo() : Boolean{
-        if(undoList[0] == null)
+        if(undoStack[0] == null)
             return false
-        for((loc, block) in undoList[0]!!)
+        for((loc, block) in undoStack[0]!!)
             place(loc, block)
-        for(index in 0 until undoList.size-1)
-            undoList[index] = undoList[index+1]
+        for(index in 0 until undoStack.size-1)
+            undoStack[index] = undoStack[index+1]
         return true
     }
     private fun popRedo() : Boolean{
-        if(redoList[0] == null)
+        if(redoStack[0] == null)
             return false
 
-        for((loc, block) in redoList[0]!!)
+        for((loc, block) in redoStack[0]!!)
             place(loc, block)
-        for(index in 0 until redoList.size-1)
-            redoList[index] = redoList[index+1]
+        for(index in 0 until redoStack.size-1)
+            redoStack[index] = redoStack[index+1]
         return true
     }
 
-    fun undo(amount : Int) : Boolean{
-        var completed = true
-        val cappedAmount = Math.min(Math.max(1, amount), 10)
-        if(undoList.all { i -> i==null }) return false
-        start()
-        for(i in 0 until cappedAmount){
-            if(!popUndo())
-                completed = false
+    fun undo(amount : Int, messenger : Player){
+        runRecorderAsync{ _ ->
+            var completed = 0
+            val cappedAmount = Math.min(Math.max(1, amount), 10)
+            if (undoStack.all { i -> i == null }) {
+                messenger.sendMessage("${SBPlugin.title}${ChatColor.RED}there are no available edits to undo")
+            } else {
+                start()
+                for (i in 0 until cappedAmount) {
+                    if (!popUndo())
+                        completed++
+                }
+                pushRedo()
+                messenger.sendMessage("${SBPlugin.title}${ChatColor.GREEN}undid $completed available edits")
+            }
         }
-        pushRedo()
-        return completed
+
     }
-    fun redo(amount : Int) : Boolean{
-        var completed = true
-        val cappedAmount = Math.min(Math.max(1, amount), 10)
-        if(redoList.all { i -> i==null }) return false
-        start()
-        for(i in 0 until cappedAmount){
-            if(!popRedo())
-                completed = false
+    fun redo(amount : Int, messenger : Player){
+        runRecorderAsync{ _ ->
+            var completed = 0
+            val cappedAmount = Math.min(Math.max(1, amount), 10)
+            if(redoStack.all { i -> i==null }){
+                messenger.sendMessage("${SBPlugin.title}${ChatColor.RED}there are no available edits to redo")
+            } else{
+                start()
+                for(i in 0 until cappedAmount){
+                    if(!popRedo())
+                        completed++
+                }
+                pushUndo()
+                messenger.sendMessage("${SBPlugin.title}${ChatColor.GREEN}redid $completed available edits")
+            }
         }
-        pushUndo()
-        return completed
     }
 
     fun place(location : Location, blockData : BlockData ){
@@ -102,13 +128,8 @@ class BlockRecorder {
             override val exampleCommand: String= "/sd undo [Int/amount]"
             override val helpText: String = "to undo your last action"
             override val baseTree = CommandIntLeaf("undo", 1, 10,
-                    {p, i -> val succeeded = StorySystem.getPlayersStory(p).undo(i)
-                        if(succeeded) p.sendMessage("${SBPlugin.title}${ChatColor.GREEN}undo done")
-                        else p.sendMessage("${SBPlugin.title}${ChatColor.RED}no more undoes left")},
-                    {p -> val succeeded = StorySystem.getPlayersStory(p).undo(1)
-                        if(succeeded) p.sendMessage("${SBPlugin.title}${ChatColor.GREEN}undo done")
-                        else p.sendMessage("${SBPlugin.title}${ChatColor.RED}no more undoes left")
-                    })
+                    {p, i -> StorySystem.getPlayersStory(p).undo(i) },
+                    {p -> StorySystem.getPlayersStory(p).undo(1) })
         }
 
         val redo = Redo
@@ -116,12 +137,8 @@ class BlockRecorder {
             override val exampleCommand: String= "/sd redo [Int/amount]"
             override val helpText: String = "to redo your last undone action"
             override val baseTree = CommandIntLeaf("redo", 1, 10,
-                    {p, i -> val succeeded = StorySystem.getPlayersStory(p).redo(i)
-                        if(succeeded) p.sendMessage("${SBPlugin.title}${ChatColor.GREEN}redo done")
-                        else p.sendMessage("${SBPlugin.title}${ChatColor.RED}no more redoes left")},
-                    {p -> val succeeded = StorySystem.getPlayersStory(p).redo(1)
-                        if(succeeded) p.sendMessage("${SBPlugin.title}${ChatColor.GREEN}redo done")
-                        else p.sendMessage("${SBPlugin.title}${ChatColor.RED}no more redoes left")})
+                    {p, i -> StorySystem.getPlayersStory(p).redo(i) },
+                    {p -> StorySystem.getPlayersStory(p).redo(1) })
         }
     }
 }

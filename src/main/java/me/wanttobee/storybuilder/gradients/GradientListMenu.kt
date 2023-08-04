@@ -1,6 +1,5 @@
 package me.wanttobee.storybuilder.gradients
 
-import me.wanttobee.storybuilder.SBPlugin
 import me.wanttobee.storybuilder.SBUtil
 import me.wanttobee.storybuilder.inventoryMenus.IInventoryMenu
 import me.wanttobee.storybuilder.inventoryMenus.InventoryMenuSystem
@@ -19,8 +18,7 @@ class GradientListMenu private constructor(private val selectEffect : (Player, G
 
     init{
 
-        val did = InventoryMenuSystem.addInventory(this)
-        SBPlugin.instance.logger.info("init $did")
+        InventoryMenuSystem.addInventory(this)
         val gradientFiles = GradientFileSystem.getAllFiles(false)
         initHotBar(gradientFiles.size/5)
         val optionsArray : Array<Gradient?> = Array(5) {i ->
@@ -36,7 +34,6 @@ class GradientListMenu private constructor(private val selectEffect : (Player, G
     }
     override fun closeEvent(player : Player, event : InventoryCloseEvent){
         val did =  InventoryMenuSystem.removeInventory(this)
-        SBPlugin.instance.logger.info("remove $did")
     }
 
     private fun initHotBar(lastPage : Int){
@@ -74,13 +71,14 @@ class GradientListMenu private constructor(private val selectEffect : (Player, G
 
             if(grad.size >= 8){
                 val extraMat =  SBUtil.itemFactory(Material.BOOK, "${ChatColor.GOLD}+${grad.size - 6}", null)
-                this.addLockedItem(gradientIndex,8, extraMat) { player ->
-                    GradientDetailsMenu(grad) { player2 ->
-                        GradientListMenu(selectEffect,page).open(player2)
-                        SBPlugin.instance.logger.info("opened list")
-                    }.open(player)
-                    SBPlugin.instance.logger.info("opened Details")
-                }
+                this.addLockedItem(gradientIndex,8, extraMat)
+                //{ player ->
+                //    GradientDetailsMenu(grad) { player2 ->
+                //        GradientListMenu(selectEffect,page).open(player2)
+                //        SBPlugin.instance.logger.info("opened list")
+                //    }.open(player)
+                //    SBPlugin.instance.logger.info("opened Details")
+                //}
             }
             else{
                 val mat = grad.getReal(7)

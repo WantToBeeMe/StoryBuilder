@@ -3,11 +3,8 @@ package me.wanttobee.storybuilder.systems.playerStory
 import me.wanttobee.storybuilder.SBPlugin
 import me.wanttobee.storybuilder.SBUtil.blockLocation
 import me.wanttobee.storybuilder.commands.ISystemCommand
-import me.wanttobee.storybuilder.commands.commandTree.CommandDoubleLeaf
-import me.wanttobee.storybuilder.commands.commandTree.CommandEmptyLeaf
-import me.wanttobee.storybuilder.commands.commandTree.CommandIntLeaf
-import me.wanttobee.storybuilder.commands.commandTree.ICommandBranch
-import me.wanttobee.storybuilder.gradients.GradientListMenu
+import me.wanttobee.storybuilder.commands.commandTree.*
+import me.wanttobee.storybuilder.systems.FontFileSystem
 import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -32,8 +29,8 @@ object StorySystem  : Listener {
             story.tick()
     }
 
-    fun loadFont(player : Player, path : String?){
-        if(path != null) getPlayersStory(player).loadFont(path)
+    fun loadFont(player : Player, path : String?) : String?{
+        return if(path != null) getPlayersStory(player).loadFont(path)
         else getPlayersStory(player).currentFontMessage()
     }
 
@@ -68,7 +65,7 @@ object StorySystem  : Listener {
 
 
 
-    object posLeftTop : ISystemCommand {
+    object PosLeftTop : ISystemCommand {
         override val exampleCommand: String= "/sd poslt"
         override val helpText: String = "set the ${ChatColor.GREEN}left top${ChatColor.RESET} position of the plane where you are"
         override val baseTree = CommandEmptyLeaf("poslt") { p ->
@@ -79,7 +76,7 @@ object StorySystem  : Listener {
         }
     }
 
-    object posRightTop : ISystemCommand {
+    object PosRightTop : ISystemCommand {
         override val exampleCommand: String= "/sd posrt"
         override val helpText: String = "set the ${ChatColor.GOLD}right top${ChatColor.RESET} position of the plane where you are"
         override val baseTree = CommandEmptyLeaf("posrt") { p ->
@@ -90,7 +87,7 @@ object StorySystem  : Listener {
         }
     }
 
-    object posLeftBottom : ISystemCommand {
+    object PosLeftBottom : ISystemCommand {
         override val exampleCommand: String= "/sd poslb"
         override val helpText: String = "set the ${ChatColor.LIGHT_PURPLE}left bottom${ChatColor.RESET} position of the plane where you are"
         override val baseTree = CommandEmptyLeaf("poslb") { p ->
@@ -101,7 +98,7 @@ object StorySystem  : Listener {
         }
     }
 
-    object posRightBottom : ISystemCommand {
+    object PosRightBottom : ISystemCommand {
         override val exampleCommand: String= "/sd posrb"
         override val helpText: String = "set the ${ChatColor.AQUA}right bottom${ChatColor.RESET} position of the plane where you are"
         override val baseTree = CommandEmptyLeaf("posrb") { p ->
@@ -112,7 +109,7 @@ object StorySystem  : Listener {
         }
     }
 
-    object curveFactor : ISystemCommand {
+    object CurveFactor : ISystemCommand {
         override val exampleCommand: String ="/sd curveFactor [value/Double]"
         override val helpText: String = "changes how extreme the curves of your plane are (0 as if there where no control points)"
         override val baseTree: ICommandBranch = CommandDoubleLeaf("curveFactor", 0.0, null, {p,f ->
@@ -131,4 +128,29 @@ object StorySystem  : Listener {
                p.sendMessage("${SBPlugin.title}${ChatColor.RED}you have no plane")
         })
     }
+
+    object Font : ISystemCommand {
+        override val exampleCommand: String = "/sb font [fontFile]"
+        override val helpText: String = "to change the font you want to use to build with"
+        override val baseTree: ICommandBranch = CommandStringLeaf("font", { FontFileSystem.getAllFiles(false) },
+            { p, fileName ->
+                val done = loadFont(p,fileName)
+                if(done != null) p.sendMessage("${SBPlugin.title}${ChatColor.GREEN}font has been changed to: $done")
+                else p.sendMessage("${SBPlugin.title}${ChatColor.RED}cant find font file: ${ChatColor.WHITE}$fileName")
+            },
+            { p -> p.sendMessage("${SBPlugin.title}${loadFont(p,null)}") })
+    }
+
+    object Samples : ISystemCommand{
+        override val exampleCommand: String = "/sb samples [amount/Int]"
+        override val helpText: String = "change the amount of samples that are being used while building a structure"
+        override val baseTree: ICommandBranch = CommandIntLeaf("samples", 10, null, { p, amount ->
+            getPlayersStory(p).samples = amount
+            p.sendMessage("${SBPlugin.title}${ChatColor.GREEN}changed sample amount to: ${ChatColor.WHITE}$amount")
+        },{p ->
+            p.sendMessage("${SBPlugin.title}${ChatColor.WHITE}sample amount is currently: ${ChatColor.WHITE}${getPlayersStory(p).samples}")
+        })
+
+    }
+
 }

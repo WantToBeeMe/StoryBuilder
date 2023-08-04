@@ -3,6 +3,7 @@ package me.wanttobee.storybuilder;
 import me.wanttobee.storybuilder.gradients.GradientFileSystem
 import me.wanttobee.storybuilder.inventoryMenus.InventoryMenuSystem
 import me.wanttobee.storybuilder.systems.FontFileSystem
+import me.wanttobee.storybuilder.systems.playerStory.BlockRecorderSystem
 import me.wanttobee.storybuilder.systems.playerStory.StorySystem
 import org.bukkit.ChatColor
 import org.bukkit.plugin.java.JavaPlugin
@@ -40,6 +41,7 @@ class SBPlugin : JavaPlugin() {
         FontFileSystem.initialize()
         GradientFileSystem.initialize()
 
+        BlockRecorderSystem.startBlockRecorder()
         server.pluginManager.registerEvents(InventoryMenuSystem, this)
         server.pluginManager.registerEvents(StorySystem, this)
         server.scheduler.scheduleSyncRepeatingTask(this, { StorySystem.everyTick() } , 0, 1 )

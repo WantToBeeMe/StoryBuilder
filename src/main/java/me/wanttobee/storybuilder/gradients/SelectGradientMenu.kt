@@ -24,11 +24,12 @@ class SelectGradientMenu(private val gradient : Gradient, private val doneEffect
         }
         if(gradient.size > 5){
             val extraMat =  SBUtil.itemFactory(Material.BOOK, "${ChatColor.GOLD}+${gradient.size - 4}", null)
-            this.addLockedItem(6, extraMat ) { player ->
-                GradientDetailsMenu(gradient) { player2 ->
-                    SelectGradientMenu(gradient,doneEffect).open(player2)
-                }.open(player)
-            }
+            this.addLockedItem(6, extraMat )
+            //{ player ->
+            //    GradientDetailsMenu(gradient) { player2 ->
+            //        SelectGradientMenu(gradient,doneEffect).open(player2)
+            //    }.open(player)
+            //}
         }
         else{
             val mat = gradient.getReal(4) ?: Material.AIR

@@ -18,18 +18,23 @@ class PlayersStory(private val owner : Player) {
     private val blockRecorder = BlockRecorder()
     private var fontPath = ""
     private var font : Font? = null
+    var samples = 100
     val gradientMaker = GradientMakerMenu()
     var currentGradient : Gradient = Gradient("default", arrayOf(Material.STONE) )//GradientFileSystem.getGradient( GradientFileSystem.getAllFiles().first() )!!
     var morphPlane : MorphPlane? = null
         private set
 
-    fun startBlockRecorder() : BlockRecorder{
-        if(morphPlane != null) morphPlane!!.undoPlacePoints()
-        blockRecorder.start()
-        return blockRecorder
+
+    fun runBlockRecorderAsync(task : (BlockRecorder) -> Unit){
+        blockRecorder.runRecorderAsync(task)
     }
-    fun undo(amount : Int) : Boolean{ return blockRecorder.undo(amount) }
-    fun redo(amount : Int) : Boolean{ return blockRecorder.redo(amount) }
+    fun runBlockRecorderSynced(task: (BlockRecorder) -> Unit){
+        blockRecorder.runRecorderSynced(task)
+    }
+
+
+    fun undo(amount : Int) { blockRecorder.undo(amount,owner) }
+    fun redo(amount : Int) { blockRecorder.redo(amount,owner) }
 
     fun getPlane() : MorphPlane{
         if(morphPlane == null)
@@ -42,20 +47,15 @@ class PlayersStory(private val owner : Player) {
         InventoryMenuSystem.removeInventory(gradientMaker)
     }
 
-    fun loadFont(newFontPath: String) {
-        val newFont = FontFileSystem.getFont(newFontPath)
-        if(newFont == null){
-            owner.sendMessage("${ChatColor.RED}Cant find font file: ${ChatColor.GRAY}$newFontPath")
-            return
-        }
-        font = newFont
+    fun getCurrentFont() : Font?{ return font }
+    fun loadFont(newFontPath: String) : String? {
+        font = FontFileSystem.getFont(newFontPath) ?: return null
         fontPath  = newFontPath
-        owner.sendMessage("${ChatColor.GREEN}font has been changed to:")
-        currentFontMessage()
+        return currentFontMessage()
     }
-    fun currentFontMessage(){
-        if(font == null) owner.sendMessage("${ChatColor.RED}Currently no font active")
-        else owner.sendMessage("${ChatColor.WHITE}${fontPath.removeSuffix(".ttf")}> ${ChatColor.GOLD}${font!!.fontName}")
+    fun currentFontMessage() : String{
+        return if(font == null) "${ChatColor.RED}Currently no font active"
+        else "${ChatColor.WHITE}${fontPath.removeSuffix(".ttf")}> ${ChatColor.GOLD}${font!!.fontName}"
     }
 
     fun tick() {
@@ -142,4 +142,6 @@ class PlayersStory(private val owner : Player) {
             return
         }
     }
+
+
 }
