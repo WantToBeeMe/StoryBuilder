@@ -49,8 +49,5 @@ class SBPlugin : JavaPlugin() {
         StartUpTests.run()
     }
 
-    override fun onDisable() {
-        for((_,st) in StorySystem.stories)
-            st.clear()
-    }
+    override fun onDisable() {}
 }

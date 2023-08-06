@@ -117,7 +117,9 @@ class BlockRecorder {
         currentAction = mutableMapOf()
         return this
     }
-    fun finish(){ pushUndo() }
+    fun finish(){
+        pushUndo()
+    }
 //for(i in undoList.indices){
     //    SBPlugin.instance.logger.info(i.toString() + " - " +(undoList[i] != null).toString())
     //}

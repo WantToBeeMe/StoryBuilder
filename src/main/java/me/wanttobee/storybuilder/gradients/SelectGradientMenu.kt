@@ -8,6 +8,7 @@ import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.entity.Player
+import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
@@ -15,9 +16,17 @@ import org.bukkit.inventory.ItemStack
 class SelectGradientMenu(private val gradient : Gradient, private val doneEffect : (Player)->Unit) : IInventoryMenu()  {
     constructor(player :Player, doneEffect: (Player) -> Unit) : this(StorySystem.getPlayersStory(player).currentGradient, doneEffect)
     override var inventory: Inventory = Bukkit.createInventory(null, 9, "block/gradient picker")
+    private val gradientPicker = SBUtil.itemFactory(Material.CHEST, "${ChatColor.GOLD}Load a gradient", listOf("${ChatColor.GRAY}or click with a block for", "${ChatColor.GRAY}a single block action"))
 
     init{
         InventoryMenuSystem.addInventory(this)
+
+        this.addLockedItem(7, separator)
+        loadGradient()
+        initLoadGradient()
+        initDoneButton()
+    }
+    private fun loadGradient(){
         for(i in 0 until 4){
             val mat = gradient.getReal(i) ?: Material.AIR
             this.addLockedItem(2 + i, ItemStack(mat) )
@@ -25,11 +34,6 @@ class SelectGradientMenu(private val gradient : Gradient, private val doneEffect
         if(gradient.size > 5){
             val extraMat =  SBUtil.itemFactory(Material.BOOK, "${ChatColor.GOLD}+${gradient.size - 4}", null)
             this.addLockedItem(6, extraMat )
-            //{ player ->
-            //    GradientDetailsMenu(gradient) { player2 ->
-            //        SelectGradientMenu(gradient,doneEffect).open(player2)
-            //    }.open(player)
-            //}
         }
         else{
             val mat = gradient.getReal(4) ?: Material.AIR
@@ -37,15 +41,10 @@ class SelectGradientMenu(private val gradient : Gradient, private val doneEffect
         }
 
         this.addLockedItem(1, separator)
-        this.addLockedItem(7, separator)
-
-        initLoadGradient()
-        initDoneButton()
     }
 
     private fun initLoadGradient(){
-        val item = SBUtil.itemFactory(Material.CHEST, "${ChatColor.GOLD}Load a gradient", null)
-        this.addLockedItem(0, item) { pickingPlayer -> //the pickingPlayer and pickedPlayer are the same lol
+        this.addLockedItem(0, gradientPicker) { pickingPlayer -> //the pickingPlayer and pickedPlayer are the same lol
             GradientListMenu() {pickedPlayer,grad ->
                 SelectGradientMenu(grad,doneEffect).open(pickedPlayer)
             }.open(pickingPlayer)
@@ -61,9 +60,24 @@ class SelectGradientMenu(private val gradient : Gradient, private val doneEffect
         }
     }
 
+    override fun clickEvent(player: Player, event: InventoryClickEvent) {
+        val item = event.currentItem ?: return
+
+        if(item == gradientPicker){
+            val mat = event.cursor?.type ?: Material.FEATHER
+            if(mat.isBlock && mat != Material.AIR){
+                SelectGradientMenu(Gradient("SingleBlock", arrayOf(mat)),doneEffect).open(player)
+                event.isCancelled = true
+                return
+            }
+        }
+        super.clickEvent(player, event)
+    }
+
     override fun closeEvent(player : Player, event : InventoryCloseEvent){
         InventoryMenuSystem.removeInventory(this)
     }
+
 
 
 }

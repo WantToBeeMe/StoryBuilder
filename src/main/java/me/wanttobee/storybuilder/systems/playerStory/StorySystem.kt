@@ -4,13 +4,13 @@ import me.wanttobee.storybuilder.SBPlugin
 import me.wanttobee.storybuilder.SBUtil.blockLocation
 import me.wanttobee.storybuilder.commands.ISystemCommand
 import me.wanttobee.storybuilder.commands.commandTree.*
+import me.wanttobee.storybuilder.morphPlane.MorphPlaneMenu
 import me.wanttobee.storybuilder.systems.FontFileSystem
 import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
-import org.bukkit.event.player.PlayerDropItemEvent
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
@@ -46,13 +46,9 @@ object StorySystem  : Listener {
         stories[player] = PlayersStory(player)
     }
 
-    @EventHandler
-    fun onHotBarDropItem(event: PlayerDropItemEvent) {
-        val player = event.player
-        val item = event.itemDrop.itemStack
-        if (item.type == Material.FEATHER)
-            getPlayersStory(player).onFeatherDrop(event)
-    }
+    //@EventHandler
+    //fun onHotBarDropItem(event: PlayerDropItemEvent) {}
+
     @EventHandler
     fun onFeatherInteract(event: PlayerInteractEvent) {
         val player = event.player
@@ -61,51 +57,15 @@ object StorySystem  : Listener {
             getPlayersStory(player).onFeatherInteract(event)
     }
 
-
-
-
-
-    object PosLeftTop : ISystemCommand {
-        override val exampleCommand: String= "/sd poslt"
-        override val helpText: String = "set the ${ChatColor.GREEN}left top${ChatColor.RESET} position of the plane where you are"
-        override val baseTree = CommandEmptyLeaf("poslt") { p ->
-            val plane = getPlayersStory(p).getPlane()
-            val location = p.location
-            plane.setLeftTop(location.blockLocation())
-            p.sendMessage("${SBPlugin.title}set ${ChatColor.GREEN}left top${ChatColor.RESET} to your current location ${ChatColor.GRAY}(${location.blockX}/${location.blockY}/${location.blockZ})")
-        }
-    }
-
-    object PosRightTop : ISystemCommand {
-        override val exampleCommand: String= "/sd posrt"
-        override val helpText: String = "set the ${ChatColor.GOLD}right top${ChatColor.RESET} position of the plane where you are"
-        override val baseTree = CommandEmptyLeaf("posrt") { p ->
-            val plane = getPlayersStory(p).getPlane()
-            val location = p.location
-            plane.setRightTop(location.blockLocation())
-            p.sendMessage("${SBPlugin.title}set ${ChatColor.GOLD}right top${ChatColor.RESET} to your current location ${ChatColor.GRAY}(${location.blockX}/${location.blockY}/${location.blockZ})")
-        }
-    }
-
-    object PosLeftBottom : ISystemCommand {
-        override val exampleCommand: String= "/sd poslb"
-        override val helpText: String = "set the ${ChatColor.LIGHT_PURPLE}left bottom${ChatColor.RESET} position of the plane where you are"
-        override val baseTree = CommandEmptyLeaf("poslb") { p ->
-            val plane = getPlayersStory(p).getPlane()
-            val location = p.location
-            plane.setLeftBottom(location.blockLocation())
-            p.sendMessage("${SBPlugin.title}set ${ChatColor.LIGHT_PURPLE}left bottom${ChatColor.RESET} to your current location ${ChatColor.GRAY}(${location.blockX}/${location.blockY}/${location.blockZ})")
-        }
-    }
-
-    object PosRightBottom : ISystemCommand {
-        override val exampleCommand: String= "/sd posrb"
-        override val helpText: String = "set the ${ChatColor.AQUA}right bottom${ChatColor.RESET} position of the plane where you are"
-        override val baseTree = CommandEmptyLeaf("posrb") { p ->
-            val plane = getPlayersStory(p).getPlane()
-            val location = p.location
-            plane.setRightBottom(location.blockLocation())
-            p.sendMessage("${SBPlugin.title}set ${ChatColor.AQUA}right bottom${ChatColor.RESET} to your current location ${ChatColor.GRAY}(${location.blockX}/${location.blockY}/${location.blockZ})")
+    object OpenPlaneEditor : ISystemCommand {
+        override val exampleCommand: String ="/sd planeEditor"
+        override val helpText: String = "used to open the plane editor to create and edit a plane, this can be used instead of the feather"
+        override val baseTree: ICommandBranch = CommandEmptyLeaf("planeEditor") { player ->
+            val plane = getPlayersStory(player).morphPlane
+            if(plane == null || plane.world == player.world)
+                MorphPlaneMenu(player,player.location.blockLocation()).open(player)
+            else
+                player.sendMessage("${SBPlugin.title}${ChatColor.RED}you must be in the same dimension/world to perform this action:${ChatColor.GRAY} ${plane.world.name}")
         }
     }
 
@@ -150,7 +110,6 @@ object StorySystem  : Listener {
         },{p ->
             p.sendMessage("${SBPlugin.title}${ChatColor.WHITE}sample amount is currently: ${ChatColor.WHITE}${getPlayersStory(p).samples}")
         })
-
     }
 
 }

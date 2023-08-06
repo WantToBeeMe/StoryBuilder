@@ -3,14 +3,12 @@ package me.wanttobee.storybuilder.systems
 import me.wanttobee.storybuilder.SBPlugin
 import me.wanttobee.storybuilder.commands.ISystemCommand
 import me.wanttobee.storybuilder.commands.commandTree.*
-import me.wanttobee.storybuilder.gradients.Gradient
 import me.wanttobee.storybuilder.gradients.SelectGradientMenu
-import me.wanttobee.storybuilder.systems.playerStory.MorphPlane
+import me.wanttobee.storybuilder.gradients.SelectGradientMenu2
+import me.wanttobee.storybuilder.morphPlane.MorphPlane
 import me.wanttobee.storybuilder.systems.playerStory.PlayersStory
 import me.wanttobee.storybuilder.systems.playerStory.StorySystem
 import org.bukkit.ChatColor
-import org.bukkit.Material
-import org.bukkit.block.data.BlockData
 import org.bukkit.entity.Player
 
 object BuildingSystem {
@@ -25,9 +23,13 @@ object BuildingSystem {
             player.sendMessage("${SBPlugin.title}${ChatColor.RED}you need a plane for this action")
             return
         }
+        if(!plane.isComplete()){
+            player.sendMessage("${SBPlugin.title}${ChatColor.RED}the plane isn't complete")
+            return
+        }
         if(skip) runGridBuilder(playerStory, plane, width, height)
         else{
-            SelectGradientMenu(player) { _ ->
+            SelectGradientMenu2(player) { _ ->
                 runGridBuilder(playerStory, plane, width, height)
             }.open(player)
         }
@@ -39,13 +41,13 @@ object BuildingSystem {
             val spread = playerStory.samples
             for(x in 0..width){
                 for(s in 0..spread){
-                    val loc = plane.interpolate(x/width.toDouble(),s/spread.toDouble())
+                    val loc = plane.interpolate(x/width.toDouble(),s/spread.toDouble())!!
                     br.place(loc,block )
                 }
             }
             for(y in 0..height){
                 for(s in 0..spread){
-                    val loc = plane.interpolate(s/spread.toDouble(),y/height.toDouble())
+                    val loc = plane.interpolate(s/spread.toDouble(),y/height.toDouble())!!
                     br.place(loc, block)
                 }
             }
@@ -58,6 +60,11 @@ object BuildingSystem {
             player.sendMessage("${SBPlugin.title}${ChatColor.RED}you need a plane for this action")
             return
         }
+        if(!plane.isComplete()){
+            player.sendMessage("${SBPlugin.title}${ChatColor.RED}the plane isn't complete")
+            return
+        }
+
         if(skip) runFillBuilder(playerStory, plane)
         else{
             SelectGradientMenu(player) { _ ->
@@ -65,13 +72,13 @@ object BuildingSystem {
             }.open(player)
         }
     }
-    private fun runFillBuilder(playerStory: PlayersStory,plane :MorphPlane){
+    private fun runFillBuilder(playerStory: PlayersStory,plane : MorphPlane){
         playerStory.runBlockRecorderAsync { br ->
             val block = playerStory.currentGradient.get(0).createBlockData()
             val spread = playerStory.samples
             for(x in 0..spread){
                 for(y in 0..spread){
-                    val loc = plane.interpolate(x/spread.toDouble(),y/spread.toDouble())
+                    val loc = plane.interpolate(x/spread.toDouble(),y/spread.toDouble())!!
                     br.place(loc,block)
                 }
             }
