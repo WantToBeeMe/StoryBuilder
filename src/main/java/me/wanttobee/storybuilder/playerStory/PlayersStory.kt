@@ -1,12 +1,14 @@
-package me.wanttobee.storybuilder.systems.playerStory
+package me.wanttobee.storybuilder.playerStory
 
 import me.wanttobee.storybuilder.SBPlugin
+import me.wanttobee.storybuilder.buildingSystem.RatioMode
 import me.wanttobee.storybuilder.gradients.Gradient
 import me.wanttobee.storybuilder.gradients.GradientMakerMenu
 import me.wanttobee.storybuilder.inventoryMenus.InventoryMenuSystem
 import me.wanttobee.storybuilder.morphPlane.MorphPlane
 import me.wanttobee.storybuilder.morphPlane.MorphPlaneMenu
-import me.wanttobee.storybuilder.systems.FontFileSystem
+import me.wanttobee.storybuilder.buildingSystem.buildingMenus.Alignment
+import me.wanttobee.storybuilder.buildingSystem.font.FontFileSystem
 import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -15,12 +17,19 @@ import java.awt.Font
 
 class PlayersStory(private val owner : Player) {
     private val blockRecorder = BlockRecorder()
+    val gradientMaker = GradientMakerMenu()
+    //personal settings
     private var fontPath = ""
     private var font : Font? = null
     var samples = 100
-    val gradientMaker = GradientMakerMenu()
     var currentGradient : Gradient = Gradient("default", arrayOf(Material.STONE) )//GradientFileSystem.getGradient( GradientFileSystem.getAllFiles().first() )!!
     var morphPlane : MorphPlane? = null
+    var alignment : Alignment = Alignment.CENTERED
+    var fontFill : Boolean = false
+    var fontOutOfBound : Boolean = false
+    var fontRatio : RatioMode = RatioMode.LEFT_TOP
+    var useFontSize : Boolean = false
+    var fontSize = 50
 
     fun runBlockRecorderAsync(task : (BlockRecorder) -> Unit){
         blockRecorder.runRecorderAsync(task)

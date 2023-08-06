@@ -3,13 +3,13 @@ package me.wanttobee.storybuilder
 import me.wanttobee.storybuilder.commands.ICommandSystem
 import me.wanttobee.storybuilder.commands.ISystemCommand
 import me.wanttobee.storybuilder.commands.commandTree.CommandEmptyLeaf
-import me.wanttobee.storybuilder.commands.commandTree.CommandIntLeaf
-import me.wanttobee.storybuilder.commands.commandTree.CommandPairLeaf
 import me.wanttobee.storybuilder.commands.commandTree.ICommandBranch
 import me.wanttobee.storybuilder.gradients.GradientListMenu
-import me.wanttobee.storybuilder.systems.BuildingSystem
-import me.wanttobee.storybuilder.systems.playerStory.StorySystem
-import me.wanttobee.storybuilder.systems.playerStory.BlockRecorder
+import me.wanttobee.storybuilder.inventoryMenus.InventoryMenuSystem
+import me.wanttobee.storybuilder.buildingSystem.BuildingSystem
+import me.wanttobee.storybuilder.buildingSystem.font.TextBuildingSystem
+import me.wanttobee.storybuilder.playerStory.StorySystem
+import me.wanttobee.storybuilder.playerStory.BlockRecorder
 import org.bukkit.ChatColor
 
 object SBCommands : ICommandSystem {
@@ -20,12 +20,15 @@ object SBCommands : ICommandSystem {
             BlockRecorder.redo,
             BuildingSystem.Grid,
             BuildingSystem.Fill,
+            TextBuildingSystem.Text,
             MakeGradient,
             GiveGradient,
             StorySystem.OpenPlaneEditor,
             StorySystem.CurveFactor,
-            StorySystem.Font,
+            StorySystem.FontCommand,
             StorySystem.Samples,
+            StorySystem.FontSize,
+            InventoryMenuSystem.MenuDebug,
     )
 
     object MakeGradient : ISystemCommand{

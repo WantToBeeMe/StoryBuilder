@@ -17,11 +17,13 @@ abstract class IInventoryMenu {
     protected val lockedItems : MutableList<ItemStack> = mutableListOf()
     protected val clickEvents : MutableMap<ItemStack, (Player) -> Unit> = mutableMapOf()
 
+    fun amountViewers() : Int{ return inventory.viewers.size }
+
     fun isThisInventory(check :Inventory?) : Boolean{
         return check == inventory
     }
 
-    open fun topClickEvent(player : Player, event : InventoryClickEvent){
+    open fun bottomClickEvent(player : Player, event : InventoryClickEvent){
         val item = event.currentItem ?: return
         val itemWithoutStackSize = item.clone()
         itemWithoutStackSize.amount = 1
@@ -42,7 +44,7 @@ abstract class IInventoryMenu {
         }
     }
 
-    open fun topDragEvent(player : Player, event: InventoryDragEvent){}
+    open fun bottomDragEvent(player : Player, event: InventoryDragEvent){}
     open fun dragEvent(player : Player, event: InventoryDragEvent){}
 
     open fun closeEvent(player : Player, event : InventoryCloseEvent){}

@@ -4,7 +4,7 @@ import me.wanttobee.storybuilder.SBUtil
 import me.wanttobee.storybuilder.SBUtil.blockLocation
 import me.wanttobee.storybuilder.inventoryMenus.IInventoryMenu
 import me.wanttobee.storybuilder.inventoryMenus.InventoryMenuSystem
-import me.wanttobee.storybuilder.systems.playerStory.StorySystem
+import me.wanttobee.storybuilder.playerStory.StorySystem
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Location
@@ -220,7 +220,7 @@ class MorphPlaneMenu(owner : Player,location : Location) : IInventoryMenu() {
         }
     }
 
-    override fun topClickEvent(player: Player, event: InventoryClickEvent) {
+    override fun bottomClickEvent(player: Player, event: InventoryClickEvent) {
         event.isCancelled = true
     }
     override fun closeEvent(player: Player, event: InventoryCloseEvent) {

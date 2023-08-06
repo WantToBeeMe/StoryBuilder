@@ -1,5 +1,4 @@
-package me.wanttobee.storybuilder.systems
-import me.wanttobee.storybuilder.SBPlugin
+package me.wanttobee.storybuilder.buildingSystem.font
 import org.bukkit.entity.Player
 import java.awt.Font
 import java.awt.font.FontRenderContext
@@ -8,15 +7,10 @@ import java.awt.geom.PathIterator
 import org.bukkit.Location;
 import org.bukkit.Material
 
-object FontBuildingSystem {
-    private val plugin = SBPlugin.instance
+object FontBuildingSystem2 {
     private val fontRenderContext = FontRenderContext(AffineTransform(), true, true)
 
     private const val size = 30
-
-    fun buildSentence(commander:Player, sentence : List<String>, font : Font){
-        buildWord(commander,sentence[0],font)
-    }
 
     fun buildWord(commander: Player, word: String, font : Font){
         val firstChar = word[0]
@@ -72,14 +66,14 @@ object FontBuildingSystem {
     }
 
 
-    fun distance(from: Location, to:Location) : Int{
+    private fun distance(from: Location, to:Location) : Int{
         val dx = (to.x - from.x) * (to.x - from.x)
         val dy = (to.y - from.y) * (to.y - from.y)
         val dz = (to.z - from.z) * (to.z - from.z)
         return Math.ceil(Math.sqrt(dx + dy + dz)).toInt()
     }
 
-    fun lineTo(start: Location, end: Location) {
+    private fun lineTo(start: Location, end: Location) {
         val dx = end.x - start.x
         val dy = end.y - start.y
         val dz = end.z - start.z
@@ -95,7 +89,7 @@ object FontBuildingSystem {
         }
     }
 
-    fun quadTo(start: Location, control: Location, end: Location) {
+    private fun quadTo(start: Location, control: Location, end: Location) {
         val steps = distance(start, control) + distance(control, end)
 
         for (i in 0..steps) {
@@ -108,7 +102,7 @@ object FontBuildingSystem {
         }
     }
 
-    fun cubeTo(start: Location, control1: Location, control2: Location, end: Location) {
+    private fun cubeTo(start: Location, control1: Location, control2: Location, end: Location) {
         val steps = distance(start, control1) + distance(control1, control2) + distance(control2, end)
 
         for (i in 0..steps) {

@@ -1,7 +1,6 @@
-package me.wanttobee.storybuilder.systems.playerStory
+package me.wanttobee.storybuilder.playerStory
 
 import me.wanttobee.storybuilder.SBPlugin
-import java.util.Queue
 
 object BlockRecorderSystem {
     private val plugin = SBPlugin.instance

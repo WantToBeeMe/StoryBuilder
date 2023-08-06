@@ -9,7 +9,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 
-class GradientDetailsMenu(grad : Gradient,private val closeEvent: (Player) -> Unit) : IInventoryMenu() {
+class GradientDetailsMenu(grad : Gradient,private val closeEvent: () -> Unit) : IInventoryMenu() {
     override var inventory: Inventory = Bukkit.createInventory(null,(grad.size/9+1)*9 , grad.name)
     init{
         InventoryMenuSystem.addInventory(this)
@@ -21,7 +21,7 @@ class GradientDetailsMenu(grad : Gradient,private val closeEvent: (Player) -> Un
 
     override fun closeEvent(player: Player, event: InventoryCloseEvent) {
         InventoryMenuSystem.removeInventory(this)
-        closeEvent.invoke(player)
+        closeEvent.invoke()
     }
 
 }

@@ -1,4 +1,4 @@
-package me.wanttobee.storybuilder.systems.playerStory
+package me.wanttobee.storybuilder.playerStory
 
 import me.wanttobee.storybuilder.SBPlugin
 import me.wanttobee.storybuilder.SBUtil.blockLocation

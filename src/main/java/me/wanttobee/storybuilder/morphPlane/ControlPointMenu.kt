@@ -4,7 +4,7 @@ import me.wanttobee.storybuilder.SBUtil
 import me.wanttobee.storybuilder.SBUtil.blockLocation
 import me.wanttobee.storybuilder.inventoryMenus.IInventoryMenu
 import me.wanttobee.storybuilder.inventoryMenus.InventoryMenuSystem
-import me.wanttobee.storybuilder.systems.playerStory.StorySystem
+import me.wanttobee.storybuilder.playerStory.StorySystem
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor
 import org.bukkit.Location

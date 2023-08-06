@@ -1,13 +1,13 @@
-package me.wanttobee.storybuilder.systems
+package me.wanttobee.storybuilder.buildingSystem
 
 import me.wanttobee.storybuilder.SBPlugin
 import me.wanttobee.storybuilder.commands.ISystemCommand
 import me.wanttobee.storybuilder.commands.commandTree.*
-import me.wanttobee.storybuilder.gradients.SelectGradientMenu
-import me.wanttobee.storybuilder.gradients.SelectGradientMenu2
+import me.wanttobee.storybuilder.buildingSystem.buildingMenus.SimpleBuildingMenu
 import me.wanttobee.storybuilder.morphPlane.MorphPlane
-import me.wanttobee.storybuilder.systems.playerStory.PlayersStory
-import me.wanttobee.storybuilder.systems.playerStory.StorySystem
+import me.wanttobee.storybuilder.buildingSystem.buildingMenus.FontBuildingMenu
+import me.wanttobee.storybuilder.playerStory.PlayersStory
+import me.wanttobee.storybuilder.playerStory.StorySystem
 import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 
@@ -29,7 +29,7 @@ object BuildingSystem {
         }
         if(skip) runGridBuilder(playerStory, plane, width, height)
         else{
-            SelectGradientMenu2(player) { _ ->
+            SimpleBuildingMenu(player) {
                 runGridBuilder(playerStory, plane, width, height)
             }.open(player)
         }
@@ -67,7 +67,7 @@ object BuildingSystem {
 
         if(skip) runFillBuilder(playerStory, plane)
         else{
-            SelectGradientMenu(player) { _ ->
+            SimpleBuildingMenu(player) {
                 runFillBuilder(playerStory, plane)
             }.open(player)
         }
@@ -85,6 +85,9 @@ object BuildingSystem {
         }
     }
 
+
+
+
     object Grid : ISystemCommand {
         override val exampleCommand: String = "/sd grid [Int/width] [Int/height]"
         override val helpText: String = "to generate a grid pattern on the plane"
@@ -98,7 +101,7 @@ object BuildingSystem {
 
     object Fill : ISystemCommand{
         override val exampleCommand: String = "/sd fill"
-        override val helpText: String = "to generate a grid pattern on the plane"
+        override val helpText: String = "to fill the plane with the gradient selected"
         override val baseTree: ICommandBranch = CommandStringLeaf("fill", null, {player,value -> fill(player, true) },
         {player -> fill(player, false) })
     }

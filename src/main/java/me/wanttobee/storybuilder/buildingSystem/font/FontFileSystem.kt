@@ -1,4 +1,4 @@
-package me.wanttobee.storybuilder.systems
+package me.wanttobee.storybuilder.buildingSystem.font
 import me.wanttobee.storybuilder.SBPlugin
 import java.io.File
 import java.io.FileOutputStream

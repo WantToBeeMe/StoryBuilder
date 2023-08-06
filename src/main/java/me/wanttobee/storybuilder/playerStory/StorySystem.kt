@@ -1,11 +1,11 @@
-package me.wanttobee.storybuilder.systems.playerStory
+package me.wanttobee.storybuilder.playerStory
 
 import me.wanttobee.storybuilder.SBPlugin
 import me.wanttobee.storybuilder.SBUtil.blockLocation
 import me.wanttobee.storybuilder.commands.ISystemCommand
 import me.wanttobee.storybuilder.commands.commandTree.*
 import me.wanttobee.storybuilder.morphPlane.MorphPlaneMenu
-import me.wanttobee.storybuilder.systems.FontFileSystem
+import me.wanttobee.storybuilder.buildingSystem.font.FontFileSystem
 import org.bukkit.ChatColor
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -14,6 +14,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerInteractEvent
 import org.bukkit.event.player.PlayerJoinEvent
 import org.bukkit.event.player.PlayerQuitEvent
+import org.bukkit.inventory.ItemStack
 
 object StorySystem  : Listener {
 
@@ -89,7 +90,7 @@ object StorySystem  : Listener {
         })
     }
 
-    object Font : ISystemCommand {
+    object FontCommand : ISystemCommand {
         override val exampleCommand: String = "/sb font [fontFile]"
         override val helpText: String = "to change the font you want to use to build with"
         override val baseTree: ICommandBranch = CommandStringLeaf("font", { FontFileSystem.getAllFiles(false) },
@@ -110,6 +111,18 @@ object StorySystem  : Listener {
         },{p ->
             p.sendMessage("${SBPlugin.title}${ChatColor.WHITE}sample amount is currently: ${ChatColor.WHITE}${getPlayersStory(p).samples}")
         })
+    }
+
+    object FontSize : ISystemCommand{
+        override val exampleCommand: String = "/sb fontSize [amount/Int]"
+        override val helpText: String = "used for fonts when fontSizeMode is set to \"Set\""
+        override val baseTree: ICommandBranch = CommandIntLeaf("fontSize", 1, null, { p, amount ->
+            getPlayersStory(p).fontSize = amount
+            p.sendMessage("${SBPlugin.title}${ChatColor.GREEN}changed fontSize to: ${ChatColor.WHITE}$amount")
+        },{p ->
+            p.sendMessage("${SBPlugin.title}${ChatColor.WHITE}fontSize is currently: ${ChatColor.WHITE}${getPlayersStory(p).fontSize}")
+        })
+
     }
 
 }

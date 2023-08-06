@@ -1,5 +1,10 @@
 package me.wanttobee.storybuilder.inventoryMenus
 
+import me.wanttobee.storybuilder.SBPlugin
+import me.wanttobee.storybuilder.commands.ISystemCommand
+import me.wanttobee.storybuilder.commands.commandTree.CommandEmptyLeaf
+import me.wanttobee.storybuilder.commands.commandTree.ICommandBranch
+import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -31,7 +36,7 @@ object InventoryMenuSystem : Listener {
                 return
             }
             else if(inv.isThisInventory(player.openInventory.topInventory)){
-                inv.topClickEvent(player, event)
+                inv.bottomClickEvent(player, event)
                 return
             }
         }
@@ -48,7 +53,7 @@ object InventoryMenuSystem : Listener {
                 return
             }
             else if(inv.isThisInventory(player.openInventory.topInventory)){
-                inv.topDragEvent(player, event)
+                inv.bottomDragEvent(player, event)
                 return
             }
         }
@@ -64,6 +69,21 @@ object InventoryMenuSystem : Listener {
                 return
             }
         }
+    }
+
+
+
+    fun debugText(commander : Player) {
+        commander.sendMessage("${SBPlugin.title}${ChatColor.YELLOW}active menu's:")
+        if(inventories.isEmpty())
+            commander.sendMessage("${ChatColor.GOLD}none open!!")
+        for(inv in inventories)
+            commander.sendMessage("${ChatColor.GOLD}- ${ChatColor.WHITE}${inv::class.simpleName} ${ChatColor.GRAY}(${inv.amountViewers()} open)")
+    }
+    object MenuDebug : ISystemCommand{
+        override val exampleCommand: String ="/sb menuDebug"
+        override val helpText: String = "if this is active, then i forgot to deactivate it :P, (is for checking if all the inventorys works as they should)"
+        override val baseTree: ICommandBranch = CommandEmptyLeaf("menuDebug") {player -> debugText(player)}
     }
 
 }

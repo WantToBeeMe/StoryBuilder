@@ -61,8 +61,8 @@ class GradientListMenu private constructor(private val selectEffect : (Player, G
             val grad = options[gradientIndex] ?: continue
             val tag = SBUtil.itemFactory(Material.NAME_TAG, "${ChatColor.GOLD}${grad.name}", null)
             this.addLockedItem(gradientIndex,0,tag) {player ->
-                this.closeViewers()
                 selectEffect.invoke(player, grad)
+                this.closeViewers()
             }
             for(gradBlockIndex in 0 until 7){
                 val mat = grad.getReal(gradBlockIndex) ?: break
