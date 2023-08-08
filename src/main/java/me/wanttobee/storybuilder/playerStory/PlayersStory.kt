@@ -23,7 +23,8 @@ class PlayersStory(private val owner : Player) {
     private var fontPath = ""
     private var font : Font? = null
     var samples = 100
-    var currentGradient : Gradient = Gradient("default", arrayOf(Material.STONE) )//GradientFileSystem.getGradient( GradientFileSystem.getAllFiles().first() )!!
+    var primaryGradient : Gradient = Gradient("primary", arrayOf(Material.STONE) )
+    var secondaryGradient : Gradient = Gradient("secondary", arrayOf(Material.COBBLESTONE) )
     var morphPlane : MorphPlane? = null
     var alignment : Alignment = Alignment.CENTERED
     var fontFill : Boolean = true

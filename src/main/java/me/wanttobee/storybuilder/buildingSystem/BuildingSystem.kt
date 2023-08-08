@@ -5,7 +5,6 @@ import me.wanttobee.storybuilder.commands.ISystemCommand
 import me.wanttobee.storybuilder.commands.commandTree.*
 import me.wanttobee.storybuilder.buildingSystem.buildingMenus.SimpleBuildingMenu
 import me.wanttobee.storybuilder.morphPlane.MorphPlane
-import me.wanttobee.storybuilder.buildingSystem.buildingMenus.FontBuildingMenu
 import me.wanttobee.storybuilder.playerStory.PlayersStory
 import me.wanttobee.storybuilder.playerStory.StorySystem
 import org.bukkit.ChatColor
@@ -37,17 +36,17 @@ object BuildingSystem {
     }
     private fun runGridBuilder(playerStory : PlayersStory, plane : MorphPlane, width: Int, height: Int){
         playerStory.runBlockRecorderAsync { br ->
-            val block = playerStory.currentGradient.get(0).createBlockData()
+            val block = playerStory.primaryGradient.get(0).createBlockData()
             val spread = playerStory.samples
             for(x in 0..width){
                 for(s in 0..spread){
-                    val loc = plane.interpolate(x/width.toDouble(),s/spread.toDouble())!!
+                    val loc = plane.interpolateLocation(x/width.toDouble(),s/spread.toDouble())!!
                     br.place(loc,block )
                 }
             }
             for(y in 0..height){
                 for(s in 0..spread){
-                    val loc = plane.interpolate(s/spread.toDouble(),y/height.toDouble())!!
+                    val loc = plane.interpolateLocation(s/spread.toDouble(),y/height.toDouble())!!
                     br.place(loc, block)
                 }
             }
@@ -74,11 +73,13 @@ object BuildingSystem {
     }
     private fun runFillBuilder(playerStory: PlayersStory,plane : MorphPlane){
         playerStory.runBlockRecorderAsync { br ->
-            val block = playerStory.currentGradient.get(0).createBlockData()
+            val block = playerStory.primaryGradient.get(0).createBlockData()
             val spread = playerStory.samples
             for(x in 0..spread){
                 for(y in 0..spread){
-                    val loc = plane.interpolate(x/spread.toDouble(),y/spread.toDouble())!!
+                    val tWidth = x/spread.toDouble()
+                    val tHeight = y/spread.toDouble()
+                    val loc = plane.interpolateLocation(tWidth,tHeight)!!
                     br.place(loc,block)
                 }
             }

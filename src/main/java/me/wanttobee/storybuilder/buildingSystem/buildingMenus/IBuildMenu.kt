@@ -15,7 +15,8 @@ import org.bukkit.inventory.ItemStack
 
 abstract class IBuildMenu(protected val owner :Player, protected val doneEffect : ()->Unit) : IInventoryMenu() {
     companion object{
-        private val gradientPicker = SBUtil.itemFactory(Material.CHEST, "${ChatColor.GOLD}Load a gradient", listOf("${ChatColor.GRAY}or click with a block for", "${ChatColor.GRAY}a single block action"))
+        private val primaryGradientPicker = SBUtil.itemFactory(Material.CHEST, "${ChatColor.GOLD}Select primary gradient", listOf("${ChatColor.GRAY}or click with a block for", "${ChatColor.GRAY}a single block action"))
+        private val secondaryGradientPicker = SBUtil.itemFactory(Material.CHEST, "${ChatColor.GOLD}Select secondary gradient", listOf("${ChatColor.GRAY}or click with a block for", "${ChatColor.GRAY}a single block action"))
         private val doneItem = SBUtil.itemFactory(Material.SLIME_BALL, "${ChatColor.GREEN}Done", null)
     }
 
@@ -24,10 +25,19 @@ abstract class IBuildMenu(protected val owner :Player, protected val doneEffect 
             event.isCancelled = true
             return
         }
-        if(item == gradientPicker){
+        if(item == primaryGradientPicker){
             val mat = event.cursor?.type ?: Material.FEATHER
             if(mat.isBlock && mat != Material.AIR){
-                StorySystem.getPlayersStory(player).currentGradient = Gradient("SingleBlock", arrayOf(mat))
+                StorySystem.getPlayersStory(player).primaryGradient = Gradient("SingleBlock Primary", arrayOf(mat))
+                reloadGradient()
+                event.isCancelled = true
+                return
+            }
+        }
+        if(item == secondaryGradientPicker){
+            val mat = event.cursor?.type ?: Material.FEATHER
+            if(mat.isBlock && mat != Material.AIR){
+                StorySystem.getPlayersStory(player).secondaryGradient = Gradient("SingleBlock Secondary", arrayOf(mat))
                 reloadGradient()
                 event.isCancelled = true
                 return
@@ -50,16 +60,39 @@ abstract class IBuildMenu(protected val owner :Player, protected val doneEffect 
             }
         }
     }
-    protected fun loadGradient(gradientSelectorRow : Int, columnStart : Int, columnEnd : Int,){
-        this.addLockedItem(gradientSelectorRow,columnStart, gradientPicker) { pickingPlayer -> //the pickingPlayer and pickedPlayer are the same lol
+    protected fun loadPrimaryGradient(gradientSelectorRow : Int, columnStart : Int, columnEnd : Int){
+        this.addLockedItem(gradientSelectorRow,columnStart, primaryGradientPicker) { pickingPlayer -> //the pickingPlayer and pickedPlayer are the same lol
             GradientListMenu() {pickedPlayer,grad ->
-                StorySystem.getPlayersStory(pickedPlayer).currentGradient = grad
+                StorySystem.getPlayersStory(pickedPlayer).primaryGradient = grad
                 openThisWindowAgain(pickedPlayer)
             }.open(pickingPlayer)
         }
         this.addLockedItem(gradientSelectorRow, columnStart+1, separator)
 
-        val gradient = StorySystem.getPlayersStory(owner).currentGradient
+        val gradient = StorySystem.getPlayersStory(owner).primaryGradient
+        for(i in 0 until columnEnd-columnStart - 2){
+            val mat = gradient.getReal(i) ?: Material.AIR
+            this.addLockedItem(gradientSelectorRow,i+columnStart + 2 , ItemStack(mat) )
+        }
+        if(gradient.size > columnEnd-columnStart - 1){
+            val extraMat =  SBUtil.itemFactory(Material.BOOK, "${ChatColor.GOLD}+${gradient.size -( columnEnd-columnStart - 2)}", null)
+            this.addLockedItem(gradientSelectorRow,columnEnd, extraMat )
+        }
+        else{
+            val mat = gradient.getReal(4) ?: Material.AIR
+            this.addLockedItem(gradientSelectorRow,columnEnd, ItemStack(mat) )
+        }
+    }
+    protected fun loadSecondaryGradient(gradientSelectorRow : Int, columnStart : Int, columnEnd : Int){
+        this.addLockedItem(gradientSelectorRow,columnStart, secondaryGradientPicker) { pickingPlayer -> //the pickingPlayer and pickedPlayer are the same lol
+            GradientListMenu() {pickedPlayer,grad ->
+                StorySystem.getPlayersStory(pickedPlayer).secondaryGradient = grad
+                openThisWindowAgain(pickedPlayer)
+            }.open(pickingPlayer)
+        }
+        this.addLockedItem(gradientSelectorRow, columnStart+1, separator)
+
+        val gradient = StorySystem.getPlayersStory(owner).secondaryGradient
         for(i in 0 until columnEnd-columnStart - 2){
             val mat = gradient.getReal(i) ?: Material.AIR
             this.addLockedItem(gradientSelectorRow,i+columnStart + 2 , ItemStack(mat) )
@@ -74,6 +107,7 @@ abstract class IBuildMenu(protected val owner :Player, protected val doneEffect 
         }
     }
 
+    
     protected fun setDoneButton(row : Int, column: Int){
         this.addLockedItem(row,column, doneItem) { pickingPlayer -> //the pickingPlayer and pickedPlayer are the same lol
             this.closeViewers()

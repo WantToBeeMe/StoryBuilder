@@ -17,7 +17,7 @@ class FontBuildingMenu(owner : Player, doneEffect : ()->Unit)  : IBuildMenu( own
 
     override fun openThisWindowAgain(player: Player) { FontBuildingMenu(owner,doneEffect).open(player) }
 
-    override fun reloadGradient() { this.loadGradient(0,0,6) }
+    override fun reloadGradient() { this.loadPrimaryGradient(0,0,6) }
 
     init{
         InventoryMenuSystem.addInventory(this)

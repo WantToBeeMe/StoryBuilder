@@ -4,6 +4,7 @@ import me.wanttobee.storybuilder.SBUtil.blockLocation
 import me.wanttobee.storybuilder.SBUtil.rigidParticles
 import org.bukkit.*
 import org.bukkit.Particle.DustOptions
+import org.bukkit.util.Vector
 
 
 class MorphPlane(val world : World) {
@@ -98,7 +99,7 @@ class MorphPlane(val world : World) {
         var distance = 0.0
         for(i in 1 .. samples){
             val t = i/samples.toDouble()
-            val newPoint = calculateBezierPoint(controlPoints,t)
+            val newPoint = calculateBezierLocation(controlPoints,t)
             distance += oldPoint.distance(newPoint)
             oldPoint = newPoint
         }
@@ -186,27 +187,27 @@ class MorphPlane(val world : World) {
         val lines = 8
         val animationT = Math.abs(((tick%animationTicks)/animationTicks.toDouble()) *2 -1)
         for(i in 0 .. lines){
-            val upDown = interpolate(i/lines.toDouble(), animationT) ?: return
-            val leftRight = interpolate(animationT,i/lines.toDouble()) ?: return
+            val upDown = interpolateLocation(i/lines.toDouble(), animationT) ?: return
+            val leftRight = interpolateLocation(animationT,i/lines.toDouble()) ?: return
             world.spawnParticle(Particle.FLAME, upDown, 1,0.0,0.0,0.0,0.0)
             world.spawnParticle(Particle.FLAME, leftRight, 1,0.0,0.0,0.0,0.0)
         }
     }
 
-    fun interpolate(width: Double, height: Double): Location? {
+    fun interpolateLocation(tWidth: Double, tHeight: Double): Location? {
         // Calculate the interpolated points on the top and bottom edges
         if(!isComplete()) return null
-        val top = calculateBezierPoint(listOf(leftTop!!) + topControlPoints + rightTop!!, width)
-        val bottom = calculateBezierPoint(listOf(leftBottom!!) + bottomControlPoints + rightBottom!!, width)
-        val left = calculateBezierPoint(listOf(leftTop!!) + leftControlPoints + leftBottom!!, height)
-        val right = calculateBezierPoint(listOf(rightTop!!) + rightControlPoints + rightBottom!!, height)
+        val top = calculateBezierLocation(listOf(leftTop!!) + topControlPoints + rightTop!!, tWidth)
+        val bottom = calculateBezierLocation(listOf(leftBottom!!) + bottomControlPoints + rightBottom!!, tWidth)
+        val left = calculateBezierLocation(listOf(leftTop!!) + leftControlPoints + leftBottom!!, tHeight)
+        val right = calculateBezierLocation(listOf(rightTop!!) + rightControlPoints + rightBottom!!, tHeight)
 
-        val linearTop = calculateBezierPoint(listOf(leftTop!!) + rightTop!!, width)
-        val linearBottom =calculateBezierPoint(listOf(leftBottom!!) + rightBottom!!, width)
-        val linearInterpolatedPoint = linearTop.clone().add(linearBottom.clone().subtract(linearTop).multiply(height))
+        val linearTop = calculateBezierLocation(listOf(leftTop!!) + rightTop!!, tWidth)
+        val linearBottom =calculateBezierLocation(listOf(leftBottom!!) + rightBottom!!, tWidth)
+        val linearInterpolatedPoint = linearTop.clone().add(linearBottom.clone().subtract(linearTop).multiply(tHeight))
         // Interpolate between the top and bottom edges
-        val curvedInterpolatedHeight = top.clone().add(bottom.clone().subtract(top).multiply(height))
-        val curvedInterpolatedWidth = left.clone().add(right.clone().subtract(left).multiply(width))
+        val curvedInterpolatedHeight = top.clone().add(bottom.clone().subtract(top).multiply(tHeight))
+        val curvedInterpolatedWidth = left.clone().add(right.clone().subtract(left).multiply(tWidth))
         val curvedInterpolatedPoint = curvedInterpolatedHeight.add(curvedInterpolatedWidth).multiply(0.5)
 
         val vector = curvedInterpolatedPoint.subtract(linearInterpolatedPoint)
@@ -214,7 +215,7 @@ class MorphPlane(val world : World) {
         return linearInterpolatedPoint.add(vector.multiply(curveFactor))
     }
 
-    private fun calculateBezierPoint(controlPoints: List<Location>, t: Double): Location {
+    private fun calculateBezierLocation(controlPoints: List<Location>, t: Double): Location {
         if(controlPoints.isEmpty()) return Location(world,0.0,0.0,0.0)
         if (controlPoints.size == 1) return controlPoints[0]
         val n = controlPoints.size - 1
@@ -229,12 +230,24 @@ class MorphPlane(val world : World) {
             val weight = binomialCoefficient * tPowI * tPowNMinusI
 
             val point = controlPoints[i]
-            x += (point.x +0.5)* weight
-            y += (point.y +0.5)* weight
-            z += (point.z +0.5)* weight
+            x += (point.x +0.5) * weight
+            y += (point.y +0.5) * weight
+            z += (point.z +0.5) * weight
         }
         return Location(world, x, y, z)
     }
+
+    fun interpolateDirection(tWidth: Double, tHeight: Double): Vector {
+        if (!isComplete()) return Vector()
+
+        val center = interpolateLocation(tWidth, tHeight)!!
+        val vecA = interpolateLocation(tWidth - 0.00001, tHeight)!!.toVector().subtract(center.toVector())
+        val vecB = interpolateLocation(tWidth, tHeight - 0.00001)!!.toVector().subtract(center.toVector())
+
+        return vecA.crossProduct(vecB).multiply(-1.0).normalize()
+    }
+
+
     private fun calculateBinomialCoefficient(n: Int, k: Int): Int {
         if (k == 0 || k == n) {
             return 1

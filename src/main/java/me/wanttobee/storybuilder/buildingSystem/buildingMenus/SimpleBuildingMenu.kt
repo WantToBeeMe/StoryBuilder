@@ -9,7 +9,7 @@ class SimpleBuildingMenu(owner : Player, doneEffect : ()->Unit) : IBuildMenu( ow
     override var inventory: Inventory = Bukkit.createInventory(null, 9, "block/gradient picker")
 
     override fun openThisWindowAgain(player: Player) { SimpleBuildingMenu(owner,doneEffect).open(player) }
-    override fun reloadGradient() { this.loadGradient(0,0,6) }
+    override fun reloadGradient() { this.loadPrimaryGradient(0,0,6) }
 
     init{
         InventoryMenuSystem.addInventory(this)

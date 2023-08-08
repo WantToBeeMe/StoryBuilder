@@ -47,101 +47,102 @@ object TextBuildingSystem {
     }
 
     private fun preparingTextBuilder(playerStory: PlayersStory, plane : MorphPlane, word : String, font: Font) {
+        val stepMultiplier = 1.75
         val firstChar = word[0]
         val glyphVector: GlyphVector = font.createGlyphVector(fontRenderContext, firstChar.toString())
         val outline: Shape = glyphVector.outline
         val path: PathIterator = outline.getPathIterator(AffineTransform())
 
+        val lines : MutableList<Line> = mutableListOf()
+        var startPosition: Vector2d? = null
+        var currentPosition = Vector2d(0.0, 0.0)
+        val point = DoubleArray(6)
+        while(!path.isDone){
+            val segment = path.currentSegment(point)
+            transformPoints(playerStory, glyphVector, point)
+            when (segment) {
+                PathIterator.SEG_MOVETO -> {
+                    currentPosition = Vector2d(point[0], point[1])
+                    if (startPosition == null)
+                        startPosition = currentPosition
+                }
+                PathIterator.SEG_CLOSE -> {
+                    if (startPosition != null) {
+                        lines.add(Line(arrayOf(currentPosition, startPosition)))
+                        currentPosition = startPosition
+                    }
+                    startPosition = null
+                }
+                PathIterator.SEG_LINETO -> {
+                    val newCurLock = Vector2d(point[0], point[1])
+                    lines.add(Line(arrayOf(currentPosition, newCurLock)))
+                    currentPosition = newCurLock
+                }
+                PathIterator.SEG_QUADTO -> {
+                    val newCurLock = Vector2d(point[2], point[3])
+                    val controlPoint = Vector2d(point[0], point[1])
+                    lines.add(Line(arrayOf(currentPosition, controlPoint, newCurLock)))
+                    currentPosition = newCurLock
+                }
+                PathIterator.SEG_CUBICTO -> {
+                    val newCurLock = Vector2d(point[4], point[5])
+                    val controlPoint1 = Vector2d(point[0], point[1])
+                    val controlPoint2 = Vector2d(point[2], point[3])
+                    lines.add(Line(arrayOf(currentPosition, controlPoint1, controlPoint2, newCurLock)))
+                    currentPosition = newCurLock
+                }
+            }
+            path.next()
+        }
+
         playerStory.runBlockRecorderAsync { br ->
-            var startPosition: Vector2d? = null
-            var currentPosition = Vector2d(0.0, 0.0)
-            val point = DoubleArray(6)
-            val steps = playerStory.samples
-            val block = playerStory.currentGradient.get(1).createBlockData()
+
+            val edgeBlock = playerStory.primaryGradient.get(0).createBlockData()
+            val fillBlock = playerStory.primaryGradient.get(2).createBlockData()
+            val boundingBox = if (playerStory.fontLogicBoundingBox) glyphVector.logicalBounds else glyphVector.visualBounds
+            val xSteps = (playerStory.samples*boundingBox.width *stepMultiplier).toInt()
+            val ySteps = (playerStory.samples*boundingBox.height *stepMultiplier).toInt()
+
+            val from = doubleArrayOf(boundingBox.minX, boundingBox.minY)
+            transformPoints(playerStory, glyphVector, from)
+            val fromVector = Vector2d(from[0], from[1])
 
             if (playerStory.fontFill) {
-                for (x in 0..steps) {
-                    for (y in 0..steps) {
-                        val boundingBox = if (playerStory.fontLogicBoundingBox) glyphVector.logicalBounds else glyphVector.visualBounds
-                        val point = doubleArrayOf(boundingBox.minX + boundingBox.width * (x / steps), boundingBox.minY + boundingBox.height * (y / steps))
-                        //(point[0], point[1])
-                        if (false) {
-                            //step 1, clone the path and loop over the points
-                            //step 2, record the points and make the lines (or maybe later)
-                            //step 3, check if this point, going from the top down-words (or bot, what is closest) intersects an odd amount, then fill it
-                            transformPoints(playerStory, glyphVector, point)
-                            br.place(plane.interpolate(point[0], point[1])!!, block)
-                        }
+                for (x in 0..xSteps) {
+                    for (y in 0.. ySteps) {
+                        val intersectionPoint = doubleArrayOf(boundingBox.minX + boundingBox.width * (x / xSteps.toDouble()), boundingBox.minY + boundingBox.height * (y / ySteps.toDouble()))
+                        transformPoints(playerStory, glyphVector, intersectionPoint)
+                        //plugin.logger.info("from: ${fromVector.x} and ${fromVector.y}")
+                        //plugin.logger.info("intersection: ${intersectionPoint[0]} and ${intersectionPoint[1]}")
+                        var intersections = 0
+                        for(l in lines)
+                            intersections += l.intersectionAmount( fromVector,Vector2d(intersectionPoint[0], intersectionPoint[1]) )
+                        //plugin.logger.info("amount: $intersections")
+                        if (intersections % 2 == 1)
+                            br.place(plane.interpolateLocation(intersectionPoint[0], intersectionPoint[1])!!, fillBlock)
                     }
                 }
             }
 
-            while (!path.isDone) {
-                val segment = path.currentSegment(point)
-                transformPoints(playerStory, glyphVector, point)
-                when (segment) {
-                    PathIterator.SEG_MOVETO -> {
-                        currentPosition = Vector2d(point[0], point[1])
-                        if (startPosition == null)
-                            startPosition = currentPosition
-                    }
-
-                    PathIterator.SEG_CLOSE -> {
-                        if (startPosition != null) {
-                            val steps = steps / 10
-                            for (i in 0..steps) {
-                                val loc = lineTo(i / steps.toDouble(), plane, currentPosition, startPosition)
-                                br.place(plane.interpolate(loc.x, loc.y)!!, block)
-                            }
-                            currentPosition = startPosition
-                        }
-                        startPosition = null
-                    }
-
-                    PathIterator.SEG_LINETO -> {
-                        val newCurLock = Vector2d(point[0], point[1])
-                        for (i in 0..steps) {
-                            val loc = lineTo(i / steps.toDouble(), plane, currentPosition, newCurLock)
-                            br.place(plane.interpolate(loc.x, loc.y)!!, block)
-                        }
-                        currentPosition = newCurLock
-                    }
-
-                    PathIterator.SEG_QUADTO -> {
-                        val newCurLock = Vector2d(point[2], point[3])
-                        val controlPoint = Vector2d(point[0], point[1])
-                        for (i in 0..steps) {
-                            val loc = quadTo(i / steps.toDouble(), currentPosition, controlPoint, newCurLock)
-                            br.place(plane.interpolate(loc.x, loc.y)!!, block)
-                        }
-                        currentPosition = newCurLock
-                    }
-
-                    PathIterator.SEG_CUBICTO -> {
-                        val newCurLock = Vector2d(point[4], point[5])
-                        val controlPoint1 = Vector2d(point[0], point[1])
-                        val controlPoint2 = Vector2d(point[2], point[3])
-                        for (i in 0..steps) {
-                            val loc = cubeTo(i / steps.toDouble(), currentPosition, controlPoint1, controlPoint2, newCurLock)
-                            br.place(plane.interpolate(loc.x, loc.y)!!, block)
-                        }
-                        currentPosition = newCurLock
-                    }
+            for(l in lines){
+                val steps = (playerStory.samples * l.simpleDistance() *stepMultiplier).toInt()
+                for (i in 0..steps) {
+                    val loc = l.pointAtT(i / steps.toDouble())
+                    br.place(plane.interpolateLocation(loc.x, loc.y)!!, edgeBlock)
                 }
-                path.next()
             }
-            val boundingBox = if (playerStory.fontLogicBoundingBox) glyphVector.logicalBounds else glyphVector.visualBounds
+
             val customPoints = doubleArrayOf(
                     boundingBox.centerX, boundingBox.centerY,
                     boundingBox.minX, boundingBox.minY,
                     boundingBox.maxX, boundingBox.maxY)
             transformPoints(playerStory, glyphVector, customPoints)
-            br.place(plane.interpolate(customPoints[0], customPoints[1])!!, Material.REDSTONE_BLOCK.createBlockData())
+            br.place(plane.interpolateLocation(customPoints[0], customPoints[1])!!, Material.REDSTONE_BLOCK.createBlockData())
 
-            br.place(plane.interpolate(customPoints[2], customPoints[3])!!, Material.DIAMOND_BLOCK.createBlockData())
-            br.place(plane.interpolate(customPoints[2], customPoints[5])!!, Material.DIAMOND_BLOCK.createBlockData())
-            br.place(plane.interpolate(customPoints[4], customPoints[3])!!, Material.DIAMOND_BLOCK.createBlockData())
-            br.place(plane.interpolate(customPoints[4], customPoints[5])!!, Material.DIAMOND_BLOCK.createBlockData())
+            br.place(plane.interpolateLocation(customPoints[2], customPoints[3])!!, Material.DIAMOND_BLOCK.createBlockData())
+            br.place(plane.interpolateLocation(customPoints[2], customPoints[5])!!, Material.DIAMOND_BLOCK.createBlockData())
+            br.place(plane.interpolateLocation(customPoints[4], customPoints[3])!!, Material.DIAMOND_BLOCK.createBlockData())
+            br.place(plane.interpolateLocation(customPoints[4], customPoints[5])!!, Material.DIAMOND_BLOCK.createBlockData())
 
         }
     }
@@ -199,40 +200,78 @@ object TextBuildingSystem {
         }
     }
 
-
-
-    private fun distance(from: Vector2d, to: Vector2d) : Int{
-        val dx = (to.x - from.x) * (to.x - from.x)
-        val dy = (to.y - from.y) * (to.y - from.y)
-        return Math.ceil(Math.sqrt((dx + dy))).toInt()
-    }
-    private fun lineTo(t : Double, plane : MorphPlane, start: Vector2d, end: Vector2d): Vector2d {
-        val dx = end.x - start.x
-        val dy = end.y - start.y
-        val x = start.x + dx * t
-        val y = start.y + dy * t
-        return Vector2d(x, y)
-    }
-    private fun quadTo(t : Double, start: Vector2d, control: Vector2d, end: Vector2d): Vector2d {
-        val x = (1 - t) * (1 - t) * start.x + 2 * (1 - t) * t * control.x + t * t * end.x
-        val y = (1 - t) * (1 - t) * start.y + 2 * (1 - t) * t * control.y + t * t * end.y
-        return Vector2d(x,y)
-    }
-    private fun cubeTo(t : Double, start: Vector2d, control1: Vector2d, control2: Vector2d, end: Vector2d) : Vector2d {
-        val x = (1 - t) * (1 - t) * (1 - t) * start.x +
-                3 * (1 - t) * (1 - t) * t * control1.x +
-                3 * (1 - t) * t * t * control2.x +
-                t * t * t * end.x
-        val y = (1 - t) * (1 - t) * (1 - t) * start.y +
-                3 * (1 - t) * (1 - t) * t * control1.y +
-                3 * (1 - t) * t * t * control2.y +
-                t * t * t * end.y
-        return Vector2d(x,y)
-    }
-
     object Text : ISystemCommand {
         override val exampleCommand: String = "/sd text [word/String]"
         override val helpText: String = "to generate a word or characters"
         override val baseTree: ICommandBranch = CommandStringLeaf("text", null, { player, value -> textBuilderCommand(player, value) })
+    }
+
+    class Line(private val points : Array<Vector2d>) {
+        private val quadDetail = 5
+        private val cubeDetail = 8
+
+        private val intersectionLinePoints: Array<Vector2d>
+        init{
+            val detail = if(points.size == 3) quadDetail else cubeDetail
+            intersectionLinePoints = if(points.size <= 2) points
+            else Array(detail+1) {i -> pointAtT(i/detail.toDouble() ) }
+        }
+
+        fun simpleDistance() : Double{
+            if(points.size == 1) return 0.0
+            var dis = 0.0
+            for(i in 1 until points.size){
+                val dx = (points[i].x - points[i-1].x) * (points[i].x - points[i-1].x)
+                val dy = (points[i].y - points[i-1].y) * (points[i].y - points[i-1].y)
+                dis += Math.sqrt(dx + dy)
+            }
+            return dis
+        }
+        fun pointAtT(t : Double) : Vector2d{
+            if(points.size == 2){
+                val x = points[0].x + (points[1].x - points[0].x) * t
+                val y = points[0].y + (points[1].y - points[0].y) * t
+                return Vector2d(x, y)
+            }
+            if(points.size == 3){
+                val x = (1 - t) * (1 - t) * points[0].x + 2 * (1 - t) * t * points[1].x + t * t * points[2].x
+                val y = (1 - t) * (1 - t) * points[0].y + 2 * (1 - t) * t * points[1].y + t * t * points[2].y
+                return Vector2d(x,y)
+            }
+            if(points.size == 4){
+                val x = (1 - t) * (1 - t) * (1 - t) * points[0].x +
+                        3 * (1 - t) * (1 - t) * t * points[1].x +
+                        3 * (1 - t) * t * t * points[2].x +
+                        t * t * t * points[3].x
+                val y = (1 - t) * (1 - t) * (1 - t) * points[0].y +
+                        3 * (1 - t) * (1 - t) * t * points[1].y +
+                        3 * (1 - t) * t * t * points[2].y +
+                        t * t * t * points[3].y
+                return Vector2d(x,y)
+            }
+            return points[0]
+        }
+    
+        fun intersectionAmount(start: Vector2d, end: Vector2d): Int {
+            var amount = 0
+            for(i in 1 until intersectionLinePoints.size){
+                val intersects = doSegmentsIntersect(start,end, intersectionLinePoints[i-1],intersectionLinePoints[i])
+                if(intersects)
+                    amount++
+            }
+            return amount
+        }
+
+
+    }
+
+    fun doSegmentsIntersect(startA: Vector2d, endA: Vector2d, startB: Vector2d, endB: Vector2d): Boolean {
+        val det = (endA.x - startA.x) * (startB.y - endB.y) - (startB.x - endB.x) * (endA.y - startA.y)
+        if (det == 0.0) return false // Lines are parallel or coincident, no intersection within segments
+
+        val t = ((startB.x - startA.x) * (startB.y - endB.y) - (startB.y - startA.y) * (startB.x - endB.x)) / det
+        val u = -((startA.x - endA.x) * (startB.y - startA.y) - (startA.y - endA.y) * (startB.x - startA.x)) / det
+
+        return (t in 0.0..1.0) && (u in 0.0..1.0)
     }
 }
