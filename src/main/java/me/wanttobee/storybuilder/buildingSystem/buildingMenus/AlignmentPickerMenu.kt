@@ -14,7 +14,6 @@ import org.bukkit.inventory.Inventory
 
 class AlignmentPickerMenu(owner : Player,private val closeEvent : () -> Unit) : IInventoryMenu() {
     override var inventory: Inventory = Bukkit.createInventory(null, InventoryType.DROPPER, "Alignment Selector")
-    private var effectInvoked = false
     init{
         InventoryMenuSystem.addInventory(this)
         val currentAlignment = StorySystem.getPlayersStory(owner).alignment
@@ -34,19 +33,16 @@ class AlignmentPickerMenu(owner : Player,private val closeEvent : () -> Unit) : 
         for(i in alignments.indices){
             val pair = alignments[i]
             val item = if(currentAlignment != pair.second) SBUtil.itemFactory(Material.GRAY_STAINED_GLASS, "${ChatColor.YELLOW}Set Alignment to ${pair.first}", null)
-            else SBUtil.itemFactory(Material.YELLOW_STAINED_GLASS, "${ChatColor.YELLOW}Currently ${pair.first}", null)
+            else SBUtil.itemFactory(Material.ORANGE_STAINED_GLASS, "${ChatColor.GOLD}Currently ${pair.first}", null)
             this.addLockedItem(i, item) {player ->
-                if(currentAlignment != pair.second){
+                if(currentAlignment != pair.second)
                     StorySystem.getPlayersStory(player).alignment = pair.second
-                    effectInvoked = true
-                    closeEvent.invoke()
-                }
+                closeEvent.invoke()
             }
         }
     }
 
     override fun closeEvent(player: Player, event: InventoryCloseEvent) {
         InventoryMenuSystem.removeInventory(this)
-        if(!effectInvoked) closeEvent.invoke()
     }
 }

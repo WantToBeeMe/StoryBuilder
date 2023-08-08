@@ -1,7 +1,8 @@
 package me.wanttobee.storybuilder.playerStory
 
 import me.wanttobee.storybuilder.SBPlugin
-import me.wanttobee.storybuilder.buildingSystem.RatioMode
+import me.wanttobee.storybuilder.buildingSystem.ClampMode
+import me.wanttobee.storybuilder.buildingSystem.ClampSides
 import me.wanttobee.storybuilder.gradients.Gradient
 import me.wanttobee.storybuilder.gradients.GradientMakerMenu
 import me.wanttobee.storybuilder.inventoryMenus.InventoryMenuSystem
@@ -25,10 +26,12 @@ class PlayersStory(private val owner : Player) {
     var currentGradient : Gradient = Gradient("default", arrayOf(Material.STONE) )//GradientFileSystem.getGradient( GradientFileSystem.getAllFiles().first() )!!
     var morphPlane : MorphPlane? = null
     var alignment : Alignment = Alignment.CENTERED
-    var fontFill : Boolean = false
+    var fontFill : Boolean = true
     var fontOutOfBound : Boolean = false
-    var fontRatio : RatioMode = RatioMode.LEFT_TOP
+    var fontClampSide : ClampSides = ClampSides.LEFT_OR_TOP
+    var fontClampMode : ClampMode = ClampMode.AUTO
     var useFontSize : Boolean = false
+    var fontLogicBoundingBox : Boolean = true
     var fontSize = 50
 
     fun runBlockRecorderAsync(task : (BlockRecorder) -> Unit){
